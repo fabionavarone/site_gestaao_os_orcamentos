@@ -1,0 +1,47 @@
+# site_gestaao_os_orcamentos
+
+Projeto cadastrado pelo ai-switch.
+
+## Diretorio
+
+`/opt/provisao/site_gestaao_os_orcamentos`
+
+## Produto
+
+Este repositorio sera usado para construir o Provisao Manager: uma plataforma
+inteligente de atendimento multimodal e gestao completa de assistencia tecnica
+para a Provisao Sistemas.
+
+O blueprint mestre esta em:
+
+- `docs/product/MASTER_BLUEPRINT.md`
+
+Estado atual: MVP executavel implementado. O corte entrega gestao Web local de
+clientes, equipamentos, ordens de servico e atendimento humano, com auditoria e
+transicoes de estado controladas.
+
+## Fase atual
+
+Fase 1 inicial - nucleo operacional executavel.
+
+Consulte `docs/operations/LOCAL_RUNBOOK.md` para iniciar e testar o sistema.
+
+Implementado neste corte:
+
+- autenticacao local baseada em sessao e papeis;
+- clientes e equipamentos vinculados;
+- criacao de OS, timeline auditavel e maquina de estados;
+- caixa de entrada Web, mensagens externas e notas internas;
+- fronteira canonica e idempotente para updates Telegram;
+- testes automatizados sem dependencias externas.
+
+Ainda requer evolucao antes de producao: PostgreSQL/Redis, upload e arquivos,
+Telegram real com segredos, IA local, documentos, estoque, financeiro, portais,
+backup, observabilidade e politicas de negocio aprovadas.
+
+## Regras
+
+- Trabalhar somente dentro deste diretorio.
+- Nao alterar outros projetos em `/opt/provisao` sem autorizacao explicita.
+- Nao copiar arquivos de outros projetos sem autorizacao explicita.
+- Ler `docs/product/MASTER_BLUEPRINT.md` antes de alterar arquitetura ou dominio.
