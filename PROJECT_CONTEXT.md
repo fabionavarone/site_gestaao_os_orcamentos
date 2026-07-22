@@ -103,6 +103,9 @@ Eventos públicos de entrega, garantia e retorno passaram a enfileirar mensagens
 via o outbox Telegram existente quando aplicável; conteúdo interno permanece
 fora do canal externo.
 
+A conclusão técnica da OS está protegida por diagnóstico aprovado e pela
+conclusão de tarefas/checklists obrigatórios.
+
 ## Estado para retomada em nova seção - 2026-07-22
 
 O último commit publicado é `202095f`. A próxima unidade começou localmente

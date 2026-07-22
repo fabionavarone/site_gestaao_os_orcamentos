@@ -326,6 +326,9 @@ canônico quando há conversa Telegram vinculada; eventos internos não geram
 mensagem externa. A próxima unidade é a interface React dessas operações e o
 teste E2E completo com fake Telegram.
 
+O endpoint `POST /api/v1/service-orders/{id}/complete` exige diagnóstico
+aprovado e ausência de tarefas/checklists pendentes antes da conclusão.
+
 ## Atualização de atendimento e garantia - 2026-07-22
 
 Foi iniciado o incremento seguinte com `completion_api.py` e a migração

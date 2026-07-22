@@ -291,3 +291,6 @@ alteração local foi perdida.
 - Entrega, garantia e retorno agora reutilizam o serviço canônico de outbox
   Telegram quando a OS possui conversa Telegram; notas e eventos internos não
   são enviados.
+
+- `POST /api/v1/service-orders/{id}/complete` exige diagnóstico aprovado e
+  bloqueia tarefas ou checklists pendentes antes de mudar a OS para `completed`.

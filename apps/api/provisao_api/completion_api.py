@@ -6,7 +6,7 @@ from pydantic import BaseModel, ConfigDict, Field
 from sqlalchemy import func, select
 from sqlalchemy.orm import Session
 from .db import SessionLocal
-from .models import (Channel, Conversation, ServiceOrder, ServiceOrderDelivery, ServiceOrderEvent, ServiceOrderSequence, ServiceOrderWorkSession, ServiceVisit, User, Warranty, WarrantyReturn)
+from .models import (Channel, Conversation, ServiceOrder, ServiceOrderChecklist, ServiceOrderDelivery, ServiceOrderDiagnosis, ServiceOrderEvent, ServiceOrderSequence, ServiceOrderTask, ServiceOrderWorkSession, ServiceVisit, User, Warranty, WarrantyReturn)
 from .services.conversations import queue_outbound_message
 
 def db():
@@ -29,6 +29,8 @@ class WarrantyPayload(BaseModel):
     starts_at: datetime; ends_at: datetime; coverage: str|None=None; exclusions: str|None=None
 class ReturnPayload(BaseModel):
     reason: str=Field(min_length=3,max_length=3000)
+class CompletePayload(BaseModel):
+    notes: str|None = Field(default=None, max_length=5000)
 
 def build_router(current_user:Callable,require:Callable,audit:Callable)->APIRouter:
     router=APIRouter(prefix="/api/v1/service-orders",tags=["completion"])
@@ -68,6 +70,17 @@ def build_router(current_user:Callable,require:Callable,audit:Callable)->APIRout
         if order.status not in {"completed","resolved","diagnosis","triage","draft"}: raise HTTPException(409,"service order cannot be delivered")
         if session.scalar(select(ServiceOrderDelivery).where(ServiceOrderDelivery.service_order_id==order.id)): raise HTTPException(409,"service order already delivered")
         item=ServiceOrderDelivery(company_id=user.company_id,service_order_id=order.id,performed_by=user.id,**payload.model_dump());order.status="closed";order.completed_at=datetime.now(UTC);session.add(item);session.flush();session.add(ServiceOrderEvent(service_order_id=order.id,actor_id=user.id,event_type="delivered",detail=payload.mode));public_notify(session,order,f"OS {order.number} concluída. Equipamento disponível para {payload.mode}.");audit(session,user,"service_order_delivered","service_order_delivery",item.id);session.commit();return {"id":item.id,"mode":item.mode,"status":order.status,"delivered_at":item.delivered_at}
+    @router.post("/{order_id}/complete")
+    def complete(order_id: str, payload: CompletePayload, user: User = Depends(require("service_order.close")), session: Session = Depends(db)):
+        order = owned(session, user, order_id)
+        diagnosis = session.scalar(select(ServiceOrderDiagnosis).where(ServiceOrderDiagnosis.service_order_id == order.id, ServiceOrderDiagnosis.status == "approved"))
+        pending = session.scalar(select(ServiceOrderTask).where(ServiceOrderTask.service_order_id == order.id, ServiceOrderTask.status.not_in(["completed", "cancelled"])))
+        checklist = session.scalar(select(ServiceOrderChecklist).where(ServiceOrderChecklist.service_order_id == order.id, ServiceOrderChecklist.status != "completed"))
+        if not diagnosis: raise HTTPException(422, "an approved diagnosis is required")
+        if pending: raise HTTPException(422, "all service-order tasks must be completed")
+        if checklist: raise HTTPException(422, "all checklists must be completed")
+        order.status = "completed"; order.completed_at = datetime.now(UTC); order.public_notes = payload.notes or order.public_notes
+        session.add(ServiceOrderEvent(service_order_id=order.id, actor_id=user.id, event_type="technical_completed", detail=payload.notes or "technical completion")); public_notify(session, order, f"O atendimento da OS {order.number} foi concluído tecnicamente."); audit(session, user, "service_order_technically_completed", "service_order", order.id); session.commit(); return {"id": order.id, "status": order.status, "completed_at": order.completed_at}
     @router.post("/{order_id}/warranty",status_code=201)
     def warranty(order_id:str,payload:WarrantyPayload,user:User=Depends(require("warranty.manage")),session:Session=Depends(db)):
         order=owned(session,user,order_id)
