@@ -294,3 +294,5 @@ alteração local foi perdida.
 
 - `POST /api/v1/service-orders/{id}/complete` exige diagnóstico aprovado e
   bloqueia tarefas ou checklists pendentes antes de mudar a OS para `completed`.
+- Frontend adicionou a tela Atendimento com seleção de OS e ações reais para
+  sessão, conclusão técnica, visita e retirada. Frontend 5/5 e build passaram.

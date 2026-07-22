@@ -106,6 +106,10 @@ fora do canal externo.
 A conclusão técnica da OS está protegida por diagnóstico aprovado e pela
 conclusão de tarefas/checklists obrigatórios.
 
+A aba React Atendimento usa backend real para sessões, conclusão técnica,
+agendamento de visita e retirada; garantia/retorno e E2E ainda requerem
+ampliação.
+
 ## Estado para retomada em nova seção - 2026-07-22
 
 O último commit publicado é `202095f`. A próxima unidade começou localmente
