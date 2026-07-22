@@ -9,7 +9,7 @@ from sqlalchemy.orm import Session
 from passlib.context import CryptContext
 from .config import settings
 from .db import Base, engine, SessionLocal
-from .models import AuditLog, Branch, Company, Customer, Equipment, Role, Session as UserSession, Team, TeamMember, User, UserRole
+from .models import AuditLog, Branch, Company, Conversation, ConversationMessage, Customer, Equipment, Role, ServiceOrder, ServiceOrderEvent, Session as UserSession, Team, TeamMember, User, UserRole
 
 # OWASP-aligned memory-hard hashing, tuned to the 4-vCPU deployment target.
 pwd = CryptContext(schemes=["argon2"], argon2__memory_cost=19456, argon2__time_cost=2, argon2__parallelism=2, deprecated="auto")
@@ -48,6 +48,11 @@ class RoleIn(BaseModel): code: str = Field(pattern=r"^[a-z][a-z0-9_]{1,63}$"); n
 class BranchIn(BaseModel): name: str = Field(min_length=2,max_length=160)
 class TeamIn(BaseModel): name: str = Field(min_length=2,max_length=160); branch_id: str | None = None
 class UserIn(BaseModel): name: str = Field(min_length=2,max_length=160); email: EmailStr; password: str = Field(min_length=12,max_length=256); role_ids: list[str] = Field(min_length=1)
+class OrderIn(BaseModel): customer_id: str; equipment_id: str | None = None; title: str = Field(min_length=3,max_length=240); symptom: str | None = None; priority: str = Field(default="normal", pattern="^(low|normal|high|urgent)$")
+class TransitionIn(BaseModel): status: str; reason: str | None = Field(default=None,max_length=2000); version: int
+class ConversationIn(BaseModel): subject: str = Field(min_length=2,max_length=240); customer_id: str | None = None; channel: str = Field(default="web", pattern="^(web|telegram)$")
+class MessageIn(BaseModel): body: str = Field(min_length=1,max_length=10000); internal: bool = False
+ORDER_TRANSITIONS={"draft":{"awaiting_receipt","received","cancelled"},"awaiting_receipt":{"received","cancelled"},"received":{"triage","cancelled"},"triage":{"diagnosis","technical_hold","customer_hold"},"diagnosis":{"awaiting_budget","no_repair_condition","technical_hold"},"awaiting_budget":{"awaiting_customer_approval"},"awaiting_customer_approval":{"approved","rejected","customer_hold"},"approved":{"awaiting_parts","repair_in_progress"},"awaiting_parts":{"repair_in_progress","technical_hold"},"repair_in_progress":{"quality_test","technical_hold"},"quality_test":{"ready_for_delivery","repair_in_progress"},"ready_for_delivery":{"delivered"},"delivered":{"closed","warranty_return"},"rejected":{"closed"},"no_repair_condition":{"closed"},"technical_hold":{"triage","diagnosis","repair_in_progress"},"customer_hold":{"triage","awaiting_customer_approval"},"financial_hold":{"ready_for_delivery","closed"},"warranty_return":{"triage"},"closed":set(),"cancelled":set()}
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
@@ -82,6 +87,29 @@ def create_equipment(payload: EquipmentIn, user: User=Depends(current_user), ses
     customer=session.get(Customer,payload.customer_id)
     if not customer or customer.company_id != user.company_id: raise HTTPException(404,"customer not found")
     item=Equipment(company_id=user.company_id,internal_code=f"EQ-{secrets.token_hex(5).upper()}",**payload.model_dump()); session.add(item); audit(session,user,"create","equipment",item.id); session.commit(); return {"id":item.id}
+@app.post("/api/v1/service-orders", status_code=201)
+def create_order(payload: OrderIn, user: User=Depends(current_user), session: Session=Depends(db)):
+    customer=session.scalar(select(Customer).where(Customer.id==payload.customer_id,Customer.company_id==user.company_id))
+    if not customer: raise HTTPException(404,"customer not found")
+    if payload.equipment_id and not session.scalar(select(Equipment).where(Equipment.id==payload.equipment_id,Equipment.customer_id==customer.id)): raise HTTPException(422,"equipment does not belong to customer")
+    number=(session.query(ServiceOrder).filter_by(company_id=user.company_id).count()+1); item=ServiceOrder(company_id=user.company_id,number=number,**payload.model_dump()); session.add(item); session.flush(); session.add(ServiceOrderEvent(service_order_id=item.id,actor_id=user.id,event_type="created",detail="service order created")); audit(session,user,"create","service_order",item.id); session.commit(); return {"id":item.id,"number":number,"version":item.version}
+@app.post("/api/v1/service-orders/{order_id}/transition")
+def transition_order(order_id: str,payload: TransitionIn,user: User=Depends(current_user),session: Session=Depends(db)):
+    item=session.scalar(select(ServiceOrder).where(ServiceOrder.id==order_id,ServiceOrder.company_id==user.company_id))
+    if not item: raise HTTPException(404,"service order not found")
+    if item.version != payload.version: raise HTTPException(409,"stale service order version")
+    if payload.status not in ORDER_TRANSITIONS.get(item.status,set()): raise HTTPException(409,"invalid service order transition")
+    if payload.status in {"cancelled","closed","technical_hold","customer_hold","financial_hold"} and not payload.reason: raise HTTPException(422,"reason required")
+    old=item.status; item.status=payload.status; item.version+=1; session.add(ServiceOrderEvent(service_order_id=item.id,actor_id=user.id,event_type="status_changed",detail=f"{old} -> {item.status}: {payload.reason or ''}")); audit(session,user,"transition","service_order",item.id,{"from":old,"to":item.status}); session.commit(); return {"id":item.id,"status":item.status,"version":item.version}
+@app.post("/api/v1/conversations",status_code=201)
+def create_conversation(payload: ConversationIn,user: User=Depends(current_user),session: Session=Depends(db)):
+    if payload.customer_id and not session.scalar(select(Customer).where(Customer.id==payload.customer_id,Customer.company_id==user.company_id)): raise HTTPException(404,"customer not found")
+    item=Conversation(company_id=user.company_id,assigned_to=user.id,**payload.model_dump()); session.add(item); audit(session,user,"create","conversation",item.id); session.commit(); return {"id":item.id}
+@app.post("/api/v1/conversations/{conversation_id}/messages",status_code=201)
+def send_message(conversation_id: str,payload: MessageIn,user: User=Depends(current_user),session: Session=Depends(db)):
+    conversation=session.scalar(select(Conversation).where(Conversation.id==conversation_id,Conversation.company_id==user.company_id))
+    if not conversation: raise HTTPException(404,"conversation not found")
+    message=ConversationMessage(conversation_id=conversation.id,direction="internal" if payload.internal else "outbound",author_name=user.name,body=payload.body,internal=payload.internal); session.add(message); audit(session,user,"message","conversation",conversation.id,{"internal":payload.internal}); session.commit(); return {"id":message.id}
 
 @app.post("/api/v1/roles", status_code=201)
 def create_role(payload: RoleIn, user: User=Depends(require("organization.manage")), session: Session=Depends(db)):
