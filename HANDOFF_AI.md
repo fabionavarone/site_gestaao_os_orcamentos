@@ -72,6 +72,10 @@ persistência que Telegram e Web devem compartilhar.
 Próximo incremento: gateway Telegram configurável e real, adaptado a esse
 serviço. Não criar acesso do bot ao banco nem enviar diretamente da request.
 
+Último commit local: `8e2b0fb feat: add canonical omnichannel outbox`.
+O push para `origin/main` foi tentado e permaneceu pendente por falha de DNS
+para `github.com`; o commit local está preservado e a árvore estava limpa.
+
 ## Ultimos logs da API
 
 Logs da API nao encontrados ou servico api nao existe.

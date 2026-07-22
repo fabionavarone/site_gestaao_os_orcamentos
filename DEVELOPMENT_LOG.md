@@ -125,3 +125,7 @@ Proximo passo recomendado:
 
 Próximo passo recomendado: implementar gateway Telegram real como adaptador do
 serviço canônico, com token criptografado, webhook validado e contrato local fake.
+
+Commit local criado: `8e2b0fb feat: add canonical omnichannel outbox`.
+O push para `origin/main` falhou por resolução DNS de `github.com`; nenhuma
+alteração local foi perdida.
