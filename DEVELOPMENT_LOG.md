@@ -176,3 +176,18 @@ alteração local foi perdida.
 - `npm audit` havia registrado zero vulnerabilidades na validação anterior; a
   repetição final foi impedida exclusivamente pelo DNS do registry.
 - Commit funcional: `8be9f5d feat: complete inbox operational controls`.
+
+## 2026-07-22 - Workflow persistente da Entrega Vertical 2
+
+- Criada revisão `c4f23b1a9d02` com definições, versões, estados, transições,
+  instâncias, eventos e execuções de ações, além de contador transacional de OS.
+- Migração cria workflow publicado por empresa e vincula OS existentes sem
+  alterar seus estados ou eventos. PostgreSQL local confirmou revisão, zero OS
+  perdidas e zero OS sem instância.
+- Motor valida grafo, condições declarativas e ações permitidas; publicação é
+  imutável, clonagem preserva instâncias antigas e transições registram histórico.
+- APIs e editor React cobrem definição, versão, estado, transição, validação,
+  publicação, arquivamento, instâncias e histórico.
+- Testes aprovados: backend 17/17, legado 3/3, frontend 5/5, compileall, build
+  TypeScript/Vite e Alembic upgrade/downgrade/upgrade.
+- Commits: `17865b8`, `8cd4676` e `a9d9488`.

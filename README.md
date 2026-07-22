@@ -44,9 +44,13 @@ Implementado neste corte:
   automação, notas, anexos, bots, saúde/métricas e dead-letter;
 - workers de inbox/outbox com locks, retry, backoff, rate limit e auditoria;
 - Compose com migração, PostgreSQL, Redis, API, workers, frontend e Nginx.
+- workflow persistente e versionado, publicação imutável, editor React,
+  instâncias/histórico e migração das OS existentes;
 
 Ativação externa depende apenas de token autorizado e domínio/TLS. Consulte
 `docs/operations/TELEGRAM_AND_INBOX.md`.
+
+Operação do motor de fluxo: `docs/operations/WORKFLOW.md`.
 
 ## Regras
 

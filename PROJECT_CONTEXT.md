@@ -49,12 +49,14 @@ Documento base:
   pausar automação e vincular cliente, equipamento e OS usando seletores
   isolados pela empresa. A administração de bots expõe modo, webhook, saúde e
   métricas sem retornar credenciais.
+- A revisão `c4f23b1a9d02` introduz workflow persistente/versionado, publicação
+  imutável, instâncias e histórico. O workflow padrão preserva os estados
+  existentes e novas OS usam numeração transacional por empresa.
 
 ## Proximo passo recomendado
 
-Próximo incremento recomendado: homologar externamente a cadeia Telegram quando
-token e domínio autorizados estiverem disponíveis e iniciar o workflow
-persistente previsto no blueprint. A Entrega Vertical 1 está validada localmente.
+Próximo incremento da Entrega Vertical 2: CRM completo, contatos, endereços e
+detecção auditável de duplicidades. A Entrega Vertical 1 permanece validada.
 Em paralelo, validar pendencias de negocio:
 
 - categorias de equipamento do MVP;

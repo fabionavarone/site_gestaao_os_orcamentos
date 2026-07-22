@@ -125,6 +125,18 @@ stack reconstruído está ativo; smoke interno confirmou API, frontend e revisã
 PostgreSQL `9c30f4a612ef`. A única ativação não executada é externa e exige token
 Telegram e domínio/TLS autorizados. O push segue dependente de DNS para GitHub.
 
+## Entrega Vertical 2 em andamento
+
+Workflow concluído nos commits `17865b8`, `8cd4676` e `a9d9488`. Revisão atual:
+`c4f23b1a9d02`. O PostgreSQL local foi migrado e confirmou zero OS sem instância.
+Regressão: 17 testes backend, 3 legados e 5 frontend aprovados; build Vite e
+ciclo Alembic reversível aprovados. Próximo requisito incompleto: CRM completo,
+contatos, endereços e duplicidades. Comando de retomada:
+
+```bash
+git status --short --branch && PYTHONPATH=apps/api .venv/bin/python -m unittest discover -s apps/api/tests -v
+```
+
 ## Ultimos logs da API
 
 Logs da API nao encontrados ou servico api nao existe.
