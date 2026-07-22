@@ -289,7 +289,11 @@ def change_conversation_state(conversation_id:str,payload:ConversationStateIn,us
     if not item: raise HTTPException(404,"conversation not found")
     if payload.assigned_user_id and not session.scalar(select(User).where(User.id==payload.assigned_user_id,User.company_id==user.company_id,User.active.is_(True))): raise HTTPException(422,"invalid assignee")
     if payload.assigned_team_id and not session.scalar(select(Team).where(Team.id==payload.assigned_team_id,Team.company_id==user.company_id,Team.active.is_(True))): raise HTTPException(422,"invalid team")
-    old=item.status; item.status=payload.status; item.assigned_to=payload.assigned_user_id; item.assigned_team_id=payload.assigned_team_id; item.automation_paused=payload.status in {"assigned","waiting_internal"}; item.closed_at=utcnow() if payload.status=="closed" else None
+    old=item.status; item.status=payload.status
+    if payload.status=="assigned": item.assigned_to=payload.assigned_user_id or user.id
+    elif payload.assigned_user_id is not None: item.assigned_to=payload.assigned_user_id
+    elif payload.status in {"new","queued"}: item.assigned_to=None
+    item.assigned_team_id=payload.assigned_team_id; item.automation_paused=payload.status in {"assigned","waiting_internal"}; item.closed_at=utcnow() if payload.status=="closed" else None
     audit(session,user,"conversation_state_changed","conversation",item.id,{"from":old,"to":item.status,"assigned_user_id":item.assigned_to,"assigned_team_id":item.assigned_team_id}); session.commit(); return {"id":item.id,"status":item.status,"assigned_to":item.assigned_to,"assigned_team_id":item.assigned_team_id}
 
 @app.post("/api/v1/conversations/{conversation_id}/automation/{action}")
@@ -349,6 +353,18 @@ def reprocess_outbox(event_id:str,user:User=Depends(require("telegram.manage")),
     event=session.scalar(select(OutboxEvent).where(OutboxEvent.id==event_id,OutboxEvent.company_id==user.company_id,OutboxEvent.status.in_(["dead_letter","failed"])))
     if not event: raise HTTPException(404,"dead-letter item not found")
     event.status="pending"; event.available_at=utcnow(); event.locked_at=None; event.locked_by=None; event.last_error=None; event.dead_lettered_at=None; audit(session,user,"outbox_reprocessed","outbox_event",event.id); session.commit(); return {"id":event.id,"status":event.status}
+
+@app.get("/api/v1/external-events")
+def list_external_events(status_filter:str|None=None,user:User=Depends(require("telegram.manage")),session:Session=Depends(db)):
+    stmt=select(ExternalEvent).where(ExternalEvent.company_id==user.company_id).order_by(ExternalEvent.received_at.desc()).limit(100)
+    if status_filter:stmt=stmt.where(ExternalEvent.status==status_filter)
+    return {"items":[{"id":x.id,"bot_id":x.bot_id,"external_event_id":x.external_event_id,"status":x.status,"attempts":x.attempts,"error":x.error,"received_at":x.received_at,"processed_at":x.processed_at} for x in session.scalars(stmt).all()]}
+
+@app.post("/api/v1/external-events/{event_id}/reprocess")
+def reprocess_external_event(event_id:str,user:User=Depends(require("telegram.manage")),session:Session=Depends(db)):
+    event=session.scalar(select(ExternalEvent).where(ExternalEvent.id==event_id,ExternalEvent.company_id==user.company_id,ExternalEvent.status.in_(["dead_letter","retry"])))
+    if not event:raise HTTPException(404,"inbox event not found")
+    event.status="received";event.error=None;event.processed_at=None;audit(session,user,"external_event_reprocessed","external_event",event.id);session.commit();return {"id":event.id,"status":event.status}
 
 @app.post("/api/v1/conversations/{conversation_id}/assignment")
 def assign_conversation(conversation_id: str, payload: AssignmentIn, user: User=Depends(current_user), session: Session=Depends(db)):
