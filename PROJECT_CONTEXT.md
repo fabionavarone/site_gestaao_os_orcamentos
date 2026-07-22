@@ -113,6 +113,8 @@ ampliação.
 Atribuição de equipe/técnico e pausa/retomada de SLA foram adicionadas ao
 backend com escopo por organização e ajuste do vencimento.
 
+Dependências de tarefas também estão persistidas e tenant-scoped.
+
 ## Estado para retomada em nova seção - 2026-07-22
 
 O último commit publicado é `202095f`. A próxima unidade começou localmente

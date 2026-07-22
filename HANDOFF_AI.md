@@ -336,6 +336,9 @@ workflow final e E2E de toda a cadeia.
 A API de atendimento também expõe atribuição de equipe/técnico e pausa/retomada
 de SLA; o cálculo trata timestamps ingênuos e timezone-aware.
 
+Tarefas possuem dependência persistida (`i5f6a7b8c904`) e a criação rejeita
+referências fora da OS.
+
 ## Atualização de atendimento e garantia - 2026-07-22
 
 Foi iniciado o incremento seguinte com `completion_api.py` e a migração

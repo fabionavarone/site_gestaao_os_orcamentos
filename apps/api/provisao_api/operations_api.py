@@ -24,7 +24,7 @@ class IntakePayload(BaseModel):
 class TriagePayload(BaseModel):
     physical_condition: str|None=None; visual_signs: str|None=None; powers_on: bool|None=None; accessories: dict={}; electrical_risk: bool=False; mechanical_risk: bool=False; suggested_priority: str|None=Field(default=None,pattern="^(low|normal|high|urgent)$"); observations: str|None=None; checklist: dict={}
 class TaskPayload(BaseModel):
-    title: str=Field(min_length=2,max_length=200); description: str|None=None; assigned_to: str|None=None; priority: str=Field(default="normal",pattern="^(low|normal|high|urgent)$"); due_at: datetime|None=None
+    title: str=Field(min_length=2,max_length=200); description: str|None=None; assigned_to: str|None=None; depends_on_task_id: str|None=None; priority: str=Field(default="normal",pattern="^(low|normal|high|urgent)$"); due_at: datetime|None=None
 class TaskStatePayload(BaseModel): status: str=Field(pattern="^(pending|in_progress|blocked|completed|cancelled)$"); blocked_reason: str|None=None
 class TimelinePayload(BaseModel): detail: str=Field(min_length=1,max_length=5000); visibility: str=Field(default="internal",pattern="^(internal|public)$")
 
@@ -68,7 +68,9 @@ def build_router(current_user:Callable,require:Callable,audit:Callable)->APIRout
         item.triaged_at=datetime.now(UTC); item.status="triage"; item.priority=payload.suggested_priority or item.priority; session.add(ServiceOrderEvent(service_order_id=item.id,actor_id=user.id,event_type="triage_completed",detail="technical triage recorded"));audit(session,user,"service_order_triage_completed","service_order",item.id);session.commit();return triage_view(current)
     @router.post("/{order_id}/tasks",status_code=201)
     def create_task(order_id:str,payload:TaskPayload,user:User=Depends(require("task.manage")),session:Session=Depends(db)):
-        item=owned(session,user,order_id); task=ServiceOrderTask(company_id=user.company_id,service_order_id=item.id,**payload.model_dump());session.add(task);session.flush();session.add(ServiceOrderEvent(service_order_id=item.id,actor_id=user.id,event_type="task_created",detail=payload.title));audit(session,user,"service_order_task_created","service_order_task",task.id);session.commit();return task_view(task)
+        item=owned(session,user,order_id); data=payload.model_dump(); dependency_id=data.get("depends_on_task_id")
+        if dependency_id and not session.scalar(select(ServiceOrderTask).where(ServiceOrderTask.id==dependency_id,ServiceOrderTask.service_order_id==item.id,ServiceOrderTask.company_id==user.company_id)): raise HTTPException(422,"task dependency not found in this service order")
+        task=ServiceOrderTask(company_id=user.company_id,service_order_id=item.id,**data);session.add(task);session.flush();session.add(ServiceOrderEvent(service_order_id=item.id,actor_id=user.id,event_type="task_created",detail=payload.title));audit(session,user,"service_order_task_created","service_order_task",task.id);session.commit();return task_view(task)
     @router.patch("/{order_id}/tasks/{task_id}")
     def update_task(order_id:str,task_id:str,payload:TaskStatePayload,user:User=Depends(require("task.manage")),session:Session=Depends(db)):
         item=owned(session,user,order_id);task=session.scalar(select(ServiceOrderTask).where(ServiceOrderTask.id==task_id,ServiceOrderTask.service_order_id==item.id,ServiceOrderTask.company_id==user.company_id));
@@ -83,7 +85,7 @@ def build_router(current_user:Callable,require:Callable,audit:Callable)->APIRout
         session.commit();return {"ok":True,"visibility":payload.visibility}
     return router
 
-def task_view(x): return {"id":x.id,"service_order_id":x.service_order_id,"title":x.title,"description":x.description,"assigned_to":x.assigned_to,"status":x.status,"priority":x.priority,"due_at":x.due_at,"completed_at":x.completed_at,"blocked_reason":x.blocked_reason}
+def task_view(x): return {"id":x.id,"service_order_id":x.service_order_id,"title":x.title,"description":x.description,"assigned_to":x.assigned_to,"depends_on_task_id":x.depends_on_task_id,"status":x.status,"priority":x.priority,"due_at":x.due_at,"completed_at":x.completed_at,"blocked_reason":x.blocked_reason}
 def sla_violated(due,status):
     if not due or status in {"closed","cancelled"}: return False
     if due.tzinfo is None: due=due.replace(tzinfo=UTC)

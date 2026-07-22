@@ -298,3 +298,5 @@ alteração local foi perdida.
   sessão, conclusão técnica, visita e retirada. Frontend 5/5 e build passaram.
 - API também suporta atribuição tenant-scoped de equipe/técnico e pausa/retomada
   de SLA com ajuste determinístico do vencimento; regressão backend 28/28.
+- Tarefas agora aceitam dependência na mesma OS, com FK/index e validação de
+  escopo; ciclo Alembic `i5f6a7b8c904` reversível foi aprovado.

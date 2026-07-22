@@ -448,7 +448,7 @@ class ServiceOrderTask(Base):
     company_id: Mapped[str] = mapped_column(ForeignKey("companies.id"), index=True)
     service_order_id: Mapped[str] = mapped_column(ForeignKey("service_orders.id", ondelete="CASCADE"), index=True)
     title: Mapped[str] = mapped_column(String(200)); description: Mapped[str | None] = mapped_column(Text)
-    assigned_to: Mapped[str | None] = mapped_column(ForeignKey("users.id"), index=True); status: Mapped[str] = mapped_column(String(20), default="pending", index=True)
+    assigned_to: Mapped[str | None] = mapped_column(ForeignKey("users.id"), index=True); depends_on_task_id: Mapped[str | None] = mapped_column(ForeignKey("service_order_tasks.id"), index=True); status: Mapped[str] = mapped_column(String(20), default="pending", index=True)
     priority: Mapped[str] = mapped_column(String(20), default="normal"); due_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True)); completed_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True)); blocked_reason: Mapped[str | None] = mapped_column(Text)
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())
 
