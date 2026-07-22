@@ -64,3 +64,19 @@ Proximo passo recomendado:
 2. Substituir SQLite por PostgreSQL e introduzir migracoes.
 3. Implementar worker/fila, arquivos e gateway Telegram real antes de expor o
    produto a usuarios externos.
+
+## 2026-07-22 - Fundacao da refatoracao modular
+
+- Confirmado diretorio e relida a documentacao obrigatoria integralmente.
+- Preservado banco SQLite e arquivos do MVP em `backups/20260722T012150Z/`,
+  com hashes SHA-256 em `SHA256SUMS`.
+- Inicializado Git e criado baseline `bd5c533` antes de alterar a arquitetura.
+- Criados Compose, configuracao de ambiente segura, Dockerfile Nginx/API e
+  inicio da API modular FastAPI/SQLAlchemy.
+- Novo nucleo introduz Argon2, sessoes com token persistido apenas por hash,
+  expiracao/revogacao, CSRF para escritas, CORS configuravel, bloqueio
+  progressivo de login e isolamento inicial por empresa.
+- Dependencias foram instaladas somente em `.venv` local, ignorado pelo Git.
+- A validacao de importacao/compilacao da API passou. Requests HTTP em memoria
+  travaram no sandbox, portanto ainda nao ha declaracao de integracao HTTP
+  aprovada; o bloqueio foi registrado em `docs/operations/EXTERNAL_BLOCKERS.md`.

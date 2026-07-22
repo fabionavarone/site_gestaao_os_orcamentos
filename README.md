@@ -16,13 +16,13 @@ O blueprint mestre esta em:
 
 - `docs/product/MASTER_BLUEPRINT.md`
 
-Estado atual: MVP executavel implementado. O corte entrega gestao Web local de
-clientes, equipamentos, ordens de servico e atendimento humano, com auditoria e
-transicoes de estado controladas.
+Estado atual: refatoracao segura em andamento. O MVP legado foi preservado e a
+nova fundacao modular FastAPI/PostgreSQL/Redis/Compose esta em `apps/api/` e
+`infra/`; ela ainda nao substituiu o runtime legado.
 
 ## Fase atual
 
-Fase 1 inicial - nucleo operacional executavel.
+Fundacao da migracao para Fase A/B.
 
 Consulte `docs/operations/LOCAL_RUNBOOK.md` para iniciar e testar o sistema.
 

@@ -27,18 +27,20 @@ Documento base:
 
 ## Estado atual
 
-- Fase atual: Fase 1 inicial - nucleo operacional executavel.
-- Codigo de aplicacao: `app/server.py` e frontend estatico em `app/static/`.
-- Persistencia local: SQLite em `data/provisao_manager.db`.
+- Fase atual: Fundacao da refatoracao para Fase A/B.
+- Legado preservado: `app/server.py`, frontend estatico e SQLite continuam
+  disponiveis somente como referencia/backup.
+- Nova aplicacao: `apps/api/`, com Compose em `docker-compose.yml`.
+- Persistencia alvo: PostgreSQL; SQLite ainda nao foi migrado.
 - Documentacao de produto: `docs/product/MASTER_BLUEPRINT.md`.
 - Execucao e limites: `docs/operations/LOCAL_RUNBOOK.md`.
 - Decisao de arquitetura do corte: `docs/adr/001-stdlib-mvp.md`.
 
 ## Proximo passo recomendado
 
-Proximo incremento recomendado, antes de qualquer uso externo: migrar a
-persistencia para PostgreSQL e separar API, worker e gateway Telegram conforme
-o blueprint. Em paralelo, validar pendencias de negocio:
+Proximo incremento recomendado: concluir migracoes Alembic e importador
+SQLite, depois implementar os modulos de identidade/organizacao e conversas.
+Em paralelo, validar pendencias de negocio:
 
 - categorias de equipamento do MVP;
 - documentos atuais a reproduzir;

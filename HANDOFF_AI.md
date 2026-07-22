@@ -1,6 +1,6 @@
 # Handoff entre IAs
 
-Data e hora da geracao: 2026-07-22 00:35:01 UTC
+Data e hora da geracao: 2026-07-22 01:45:00 UTC
 
 Nome do projeto selecionado: site_gestaao_os_orcamentos
 
@@ -21,7 +21,8 @@ Sempre verificar os arquivos .md obrigatorios antes de alterar qualquer arquivo 
 
 ## Estado Docker
 
-Docker Compose nao identificado neste projeto.
+`docker-compose.yml` foi introduzido para PostgreSQL, Redis, API, worker e
+Nginx. Ainda requer `.env` local seguro e validacao em host com Docker/rede.
 
 ## Status local
 
@@ -39,9 +40,9 @@ Provisao Sistemas.
 
 Estado atual:
 
-- Fase atual: Fase 1 inicial - nucleo operacional executavel.
-- Codigo de aplicacao: `app/server.py`, `app/static/` e `scripts/run.py`.
-- Persistencia: SQLite local em `data/provisao_manager.db`.
+- Fase atual: fundacao da migracao modular.
+- Legado preservado em `backups/20260722T012150Z/` e commit `bd5c533`.
+- Novo nucleo em `apps/api/`; PostgreSQL/Redis ainda nao foram inicializados.
 - Testes: `make test` aprovado em 2026-07-22 (3 testes).
 - Validacao manual: servidor local respondeu em `/api/v1/health` na porta 8001.
 - Documentacao de produto: registrada em `docs/product/MASTER_BLUEPRINT.md`.
@@ -52,7 +53,7 @@ Prioridade para a proxima IA:
    ou codigo.
 2. Ler `docs/adr/001-stdlib-mvp.md` e `docs/operations/LOCAL_RUNBOOK.md` antes
    de substituir o corte local por infraestrutura de producao.
-3. Migrar SQLite para PostgreSQL com migracoes antes de uso multiusuario real.
+3. Concluir Alembic e migracao SQLite para PostgreSQL antes de uso multiusuario real.
 4. Manter Telegram como gateway sem acesso direto ao banco.
 5. Manter IA local desacoplada das transacoes e com saidas validadas por schema.
 6. Nunca tratar o endpoint demonstrativo Telegram como webhook de producao sem
