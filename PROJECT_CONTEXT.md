@@ -55,12 +55,14 @@ Documento base:
 - A revisão `d7a8e2c4b901` amplia o CRM com pessoa física/jurídica, campos
   normalizados, contatos, endereços e solicitações de merge. As rotas
   `/api/v1/crm` e a tela Clientes são tenant-scoped e auditadas.
+- A revisão `e1b6c7d8f902` adiciona categorias, marcas, modelos, campos
+  completos do equipamento e acessórios; APIs `/api/v1/equipment` e tela
+  Equipamentos usam as mesmas regras de empresa e auditoria.
 
 ## Proximo passo recomendado
 
-Próximo incremento da Entrega Vertical 2: catálogos e equipamentos completos,
-incluindo acessórios e histórico. CRM e workflow persistente permanecem
-validados.
+Próximo incremento da Entrega Vertical 2: OS completa pela conversa, recepção,
+triagem e timeline técnica. CRM, catálogos e workflow permanecem validados.
 Em paralelo, validar pendencias de negocio:
 
 - categorias de equipamento do MVP;

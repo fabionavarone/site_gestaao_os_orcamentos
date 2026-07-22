@@ -184,3 +184,10 @@ a legada 3 e a frontend 5. O commit está publicado em `origin/main`.
 
 Próximo comando: implementar catálogos e equipamentos completos, preservando o
 workflow `c4f23b1a9d02` e o CRM `d7a8e2c4b901`.
+
+## Atualização de equipamentos - 2026-07-22
+
+A revisão `e1b6c7d8f902` e o incremento atual entregam categorias, marcas,
+modelos, equipamentos completos, acessórios, prevenção de duplicidade e tela
+React Equipamentos. A suíte modular está em 20 testes aprovados; a próxima
+unidade é OS pela conversa, recepção, triagem e timeline técnica.

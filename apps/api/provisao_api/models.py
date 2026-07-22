@@ -163,7 +163,60 @@ class Equipment(Base):
     model: Mapped[str | None] = mapped_column(String(100))
     serial_number: Mapped[str | None] = mapped_column(String(100))
     internal_code: Mapped[str] = mapped_column(String(32), unique=True)
+    contact_id: Mapped[str | None] = mapped_column(ForeignKey("customer_contacts.id"), index=True)
+    address_id: Mapped[str | None] = mapped_column(ForeignKey("customer_addresses.id"), index=True)
+    category_id: Mapped[str | None] = mapped_column(ForeignKey("equipment_categories.id"), index=True)
+    brand_id: Mapped[str | None] = mapped_column(ForeignKey("equipment_brands.id"), index=True)
+    model_id: Mapped[str | None] = mapped_column(ForeignKey("equipment_models.id"), index=True)
+    asset_number: Mapped[str | None] = mapped_column(String(100), index=True)
+    installation_date: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
+    purchase_date: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
+    warranty_until: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
+    status: Mapped[str] = mapped_column(String(24), default="active", index=True)
+    location: Mapped[str | None] = mapped_column(String(200))
+    technical_data: Mapped[dict] = mapped_column(JSON, default=dict)
+    notes: Mapped[str | None] = mapped_column(Text)
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())
+
+class EquipmentCategory(Base):
+    __tablename__ = "equipment_categories"
+    id: Mapped[str] = mapped_column(String(36), primary_key=True, default=uid)
+    company_id: Mapped[str] = mapped_column(ForeignKey("companies.id"), index=True)
+    parent_id: Mapped[str | None] = mapped_column(ForeignKey("equipment_categories.id"))
+    name: Mapped[str] = mapped_column(String(120))
+    active: Mapped[bool] = mapped_column(Boolean, default=True)
+    __table_args__ = (UniqueConstraint("company_id", "name"),)
+
+class EquipmentBrand(Base):
+    __tablename__ = "equipment_brands"
+    id: Mapped[str] = mapped_column(String(36), primary_key=True, default=uid)
+    company_id: Mapped[str] = mapped_column(ForeignKey("companies.id"), index=True)
+    name: Mapped[str] = mapped_column(String(120))
+    active: Mapped[bool] = mapped_column(Boolean, default=True)
+    __table_args__ = (UniqueConstraint("company_id", "name"),)
+
+class EquipmentModel(Base):
+    __tablename__ = "equipment_models"
+    id: Mapped[str] = mapped_column(String(36), primary_key=True, default=uid)
+    company_id: Mapped[str] = mapped_column(ForeignKey("companies.id"), index=True)
+    category_id: Mapped[str | None] = mapped_column(ForeignKey("equipment_categories.id"), index=True)
+    brand_id: Mapped[str | None] = mapped_column(ForeignKey("equipment_brands.id"), index=True)
+    name: Mapped[str] = mapped_column(String(120))
+    specifications: Mapped[dict] = mapped_column(JSON, default=dict)
+    active: Mapped[bool] = mapped_column(Boolean, default=True)
+    __table_args__ = (UniqueConstraint("company_id", "brand_id", "name"),)
+
+class EquipmentAccessory(Base):
+    __tablename__ = "equipment_accessories"
+    id: Mapped[str] = mapped_column(String(36), primary_key=True, default=uid)
+    company_id: Mapped[str] = mapped_column(ForeignKey("companies.id"), index=True)
+    equipment_id: Mapped[str] = mapped_column(ForeignKey("equipment.id", ondelete="CASCADE"), index=True)
+    description: Mapped[str] = mapped_column(String(200))
+    quantity: Mapped[int] = mapped_column(Integer, default=1)
+    condition: Mapped[str | None] = mapped_column(String(100))
+    observation: Mapped[str | None] = mapped_column(Text)
+    returned: Mapped[bool] = mapped_column(Boolean, default=False)
+    returned_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
 
 class ServiceOrderEvent(Base):
     __tablename__ = "service_order_events"

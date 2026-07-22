@@ -48,6 +48,8 @@ Implementado neste corte:
   instâncias/histórico e migração das OS existentes;
 - CRM tenant-scoped com clientes PF/PJ, normalização, duplicidade auditável,
   contatos, endereços e interface de clientes;
+- catálogos tenant-scoped de categorias, marcas e modelos, equipamentos
+  completos, acessórios e interface React de equipamentos;
 
 Ativação externa depende apenas de token autorizado e domínio/TLS. Consulte
 `docs/operations/TELEGRAM_AND_INBOX.md`.

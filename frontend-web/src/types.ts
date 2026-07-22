@@ -7,3 +7,4 @@ export type InboxEvent={id:string;bot_id:string;external_event_id:string;status:
 export type SelectOption={id:string;label:string};
 export type ConversationOptions={users:SelectOption[];teams:SelectOption[];customers:SelectOption[];equipment:SelectOption[];service_orders:SelectOption[]};
 export type Customer={id:string;name:string;customer_type:string;document?:string;email?:string;phone?:string;status:string;contacts?:{id:string;name:string;email?:string;phone?:string}[];addresses?:{id:string;street:string;city:string;state:string}[]};
+export type Equipment={id:string;customer_id:string;category:string;manufacturer?:string;model?:string;serial_number?:string;internal_code:string;asset_number?:string;status:string;location?:string;accessories?:{id:string;description:string;quantity:number;returned:boolean}[]};

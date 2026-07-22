@@ -192,6 +192,16 @@ alteração local foi perdida.
 - Commit: `3d06aad feat: deliver tenant scoped CRM operations`; push para
   `origin/main` concluído.
 
+## 2026-07-22 - Catálogos e equipamentos
+
+- Criada a revisão `e1b6c7d8f902` para categorias, marcas, modelos, campos
+  completos de equipamento e acessórios, com ciclo reversível validado.
+- Implementadas APIs tenant-scoped para catálogos, cadastro e busca de
+  equipamentos, prevenção de duplicidade por serial/patrimônio e acessórios.
+- Adicionada tela React Equipamentos com busca, cliente e cadastro real.
+- Testes: 20/20 backend modular, 3/3 legados, 5/5 frontend, compileall e build
+  Vite aprovados.
+
 ## 2026-07-22 - Workflow persistente da Entrega Vertical 2
 
 - Criada revisão `c4f23b1a9d02` com definições, versões, estados, transições,
