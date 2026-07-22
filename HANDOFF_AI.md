@@ -108,6 +108,10 @@ Commits da entrega:
 Serviços foram deixados ativos e saudáveis no Compose local, exceto o profile
 opcional de polling. A árvore deve ficar limpa após o commit documental final.
 
+Commit documental: `74f8c5c docs: document Telegram vertical operations`.
+O push final foi tentado e falhou apenas por resolução DNS de `github.com`; os
+seis commits à frente de `origin/main` permanecem preservados localmente.
+
 ## Ultimos logs da API
 
 Logs da API nao encontrados ou servico api nao existe.

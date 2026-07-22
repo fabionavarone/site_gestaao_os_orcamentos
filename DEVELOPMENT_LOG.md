@@ -154,3 +154,5 @@ alteração local foi perdida.
   equivalente foi executado dentro do Nginx. Não há token/domínio autorizado.
 - Commits técnicos: `eb71aa6`, `280e928` e `7385902`; documentação registrada em
   commit separado na sequência.
+- Commit documental `74f8c5c`. Push para `origin/main` tentado e não realizado
+  por falha de resolução DNS de `github.com`; commits locais preservados.
