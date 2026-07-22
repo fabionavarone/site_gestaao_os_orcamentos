@@ -320,3 +320,12 @@ A tela de OS possui ações reais para criar e revisar diagnóstico, registrar
 medição/teste e aplicar checklist publicado. Ainda faltam conclusão técnica,
 bancada/remoto/campo, agenda, entrega, garantia, retorno, notificações públicas
 e E2E completo. Faça o commit assim que `.git/index` estiver gravável.
+
+## Atualização de atendimento e garantia - 2026-07-22
+
+Foi iniciado o incremento seguinte com `completion_api.py` e a migração
+`h4e5f6a7b803`: sessões de bancada/remoto/campo, visitas, entrega/retirada,
+garantias e abertura de retorno em nova OS. Testes backend passaram 26/26,
+frontend 5/5, build e ciclo Alembic reversível passaram. Ainda faltam telas
+React dessas operações, transições finais protegidas, notificações Telegram e
+E2E completo. Preserve os arquivos locais antes de retomar.

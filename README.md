@@ -66,6 +66,10 @@ O incremento técnico local adiciona diagnóstico versionado, medições, testes
 técnicos e checklists com API tenant-scoped e ações reais na tela de OS; a
 conclusão técnica, entrega e garantia permanecem como próxima unidade.
 
+Também está implementada localmente a API de sessões de bancada/remoto/campo,
+visitas, entrega/retirada, garantia e retorno, na migração candidata
+`h4e5f6a7b803`; o frontend específico dessas ações ainda deve ser ampliado.
+
 Para encerrar esta seção e retomá-la em outra sessão, leia primeiro
 `README.md`, `PROJECT_CONTEXT.md`, `DEVELOPMENT_LOG.md` e `HANDOFF_AI.md`.
 O último commit publicado é `202095f`; há uma migração/modelos locais ainda

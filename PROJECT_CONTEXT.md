@@ -94,6 +94,11 @@ testes backend, 5 frontend, build TypeScript/Vite, compileall e ciclo Alembic.
 Conclusão técnica, atendimento especializado, entrega, garantia e retorno ainda
 devem ser implementados.
 
+O backend local já recebeu `completion_api.py` e a revisão candidata
+`h4e5f6a7b803` para sessões de trabalho, visitas, entrega/retirada, garantia e
+retorno. A API e os testes passam; a interface React correspondente e a
+integração com transições/notificações ainda são o próximo incremento.
+
 ## Estado para retomada em nova seção - 2026-07-22
 
 O último commit publicado é `202095f`. A próxima unidade começou localmente

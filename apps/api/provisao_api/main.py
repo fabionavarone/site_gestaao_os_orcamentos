@@ -74,11 +74,13 @@ from .crm_api import build_router as build_crm_router
 from .equipment_api import build_router as build_equipment_router
 from .operations_api import build_router as build_operations_router
 from .technical_api import build_router as build_technical_router
+from .completion_api import build_router as build_completion_router
 app.include_router(build_workflow_router(current_user, require, audit))
 app.include_router(build_crm_router(current_user, require, audit))
 app.include_router(build_equipment_router(current_user, require, audit))
 app.include_router(build_operations_router(current_user, require, audit))
 app.include_router(build_technical_router(current_user, require, audit))
+app.include_router(build_completion_router(current_user, require, audit))
 app.add_middleware(CORSMiddleware, allow_origins=settings().origins, allow_credentials=True, allow_methods=["GET","POST","PATCH","DELETE"], allow_headers=["Content-Type","X-CSRF-Token","X-Request-ID"])
 
 @app.middleware("http")

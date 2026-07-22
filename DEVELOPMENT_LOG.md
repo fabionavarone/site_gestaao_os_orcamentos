@@ -273,3 +273,15 @@ alteração local foi perdida.
   compileall e ciclo Alembic upgrade → downgrade → upgrade aprovados.
 - Próximo incremento: conclusão técnica, bancada/remoto/campo, agenda, entrega,
   garantia, retorno, notificações Telegram e E2E completo.
+
+## 2026-07-22 - Atendimento e garantia de OS
+
+- Criada a migração candidata `h4e5f6a7b803` para sessões de bancada/remoto/
+  campo, visitas, entrega/retirada, garantias e retornos vinculados à OS.
+- Criada `completion_api.py` com locks de sessão, estados de visita, fechamento
+  por entrega, validação de período de garantia e abertura de OS de retorno.
+- Testes de integração cobrem atendimento, visita, entrega, duplicidade,
+  garantia e retorno. Evidências atuais: 26 testes backend, 5 frontend, build,
+  compileall e Alembic upgrade/downgrade/upgrade aprovados.
+- Próximo passo: tela React para essas operações, transições finais do workflow,
+  notificações públicas Telegram e E2E completo.

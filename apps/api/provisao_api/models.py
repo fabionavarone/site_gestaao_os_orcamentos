@@ -482,6 +482,29 @@ class ServiceOrderChecklist(Base):
     __tablename__ = "service_order_checklists"
     id: Mapped[str] = mapped_column(String(36), primary_key=True, default=uid); company_id: Mapped[str] = mapped_column(ForeignKey("companies.id"), index=True); service_order_id: Mapped[str] = mapped_column(ForeignKey("service_orders.id", ondelete="CASCADE"), index=True); template_id: Mapped[str | None] = mapped_column(ForeignKey("checklist_templates.id")); template_version: Mapped[int] = mapped_column(Integer); items: Mapped[list] = mapped_column(JSON, default=list); status: Mapped[str] = mapped_column(String(20), default="pending"); completed_by: Mapped[str | None] = mapped_column(ForeignKey("users.id")); completed_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
 
+class ServiceOrderWorkSession(Base):
+    __tablename__ = "service_order_work_sessions"
+    id: Mapped[str] = mapped_column(String(36), primary_key=True, default=uid); company_id: Mapped[str] = mapped_column(ForeignKey("companies.id"), index=True); service_order_id: Mapped[str] = mapped_column(ForeignKey("service_orders.id", ondelete="CASCADE"), index=True); mode: Mapped[str] = mapped_column(String(20)); technician_id: Mapped[str] = mapped_column(ForeignKey("users.id")); status: Mapped[str] = mapped_column(String(20), default="active"); started_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now()); paused_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True)); ended_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True)); result: Mapped[str | None] = mapped_column(Text); notes: Mapped[str | None] = mapped_column(Text)
+    __table_args__ = (CheckConstraint("mode IN ('bench','remote','field')", name="work_session_mode"), CheckConstraint("status IN ('active','paused','completed','cancelled')", name="work_session_status"))
+
+class ServiceVisit(Base):
+    __tablename__ = "service_visits"
+    id: Mapped[str] = mapped_column(String(36), primary_key=True, default=uid); company_id: Mapped[str] = mapped_column(ForeignKey("companies.id"), index=True); service_order_id: Mapped[str] = mapped_column(ForeignKey("service_orders.id", ondelete="CASCADE"), index=True); technician_id: Mapped[str | None] = mapped_column(ForeignKey("users.id"), index=True); address: Mapped[str] = mapped_column(Text); scheduled_start: Mapped[datetime] = mapped_column(DateTime(timezone=True)); scheduled_end: Mapped[datetime | None] = mapped_column(DateTime(timezone=True)); status: Mapped[str] = mapped_column(String(20), default="scheduled", index=True); result: Mapped[str | None] = mapped_column(Text); notes: Mapped[str | None] = mapped_column(Text)
+    __table_args__ = (CheckConstraint("status IN ('scheduled','confirmed','en_route','on_site','completed','cancelled','no_show','rescheduled')", name="visit_status"),)
+
+class ServiceOrderDelivery(Base):
+    __tablename__ = "service_order_deliveries"
+    id: Mapped[str] = mapped_column(String(36), primary_key=True, default=uid); company_id: Mapped[str] = mapped_column(ForeignKey("companies.id"), index=True); service_order_id: Mapped[str] = mapped_column(ForeignKey("service_orders.id", ondelete="CASCADE"), unique=True); mode: Mapped[str] = mapped_column(String(20)); delivered_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now()); performed_by: Mapped[str] = mapped_column(ForeignKey("users.id")); condition: Mapped[str | None] = mapped_column(Text); accessories: Mapped[dict] = mapped_column(JSON, default=dict); notes: Mapped[str | None] = mapped_column(Text)
+    __table_args__ = (CheckConstraint("mode IN ('delivery','pickup')", name="delivery_mode"),)
+
+class Warranty(Base):
+    __tablename__ = "warranties"
+    id: Mapped[str] = mapped_column(String(36), primary_key=True, default=uid); company_id: Mapped[str] = mapped_column(ForeignKey("companies.id"), index=True); service_order_id: Mapped[str] = mapped_column(ForeignKey("service_orders.id", ondelete="CASCADE"), unique=True); starts_at: Mapped[datetime] = mapped_column(DateTime(timezone=True)); ends_at: Mapped[datetime] = mapped_column(DateTime(timezone=True)); coverage: Mapped[str | None] = mapped_column(Text); exclusions: Mapped[str | None] = mapped_column(Text); status: Mapped[str] = mapped_column(String(20), default="active"); created_by: Mapped[str] = mapped_column(ForeignKey("users.id")); created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())
+
+class WarrantyReturn(Base):
+    __tablename__ = "warranty_returns"
+    id: Mapped[str] = mapped_column(String(36), primary_key=True, default=uid); company_id: Mapped[str] = mapped_column(ForeignKey("companies.id"), index=True); original_service_order_id: Mapped[str] = mapped_column(ForeignKey("service_orders.id"), index=True); return_service_order_id: Mapped[str] = mapped_column(ForeignKey("service_orders.id"), unique=True); reason: Mapped[str] = mapped_column(Text); decision: Mapped[str | None] = mapped_column(String(20)); created_by: Mapped[str] = mapped_column(ForeignKey("users.id")); created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())
+
 class AuditLog(Base):
     __tablename__ = "audit_logs"
     id: Mapped[str] = mapped_column(String(36), primary_key=True, default=uid)
