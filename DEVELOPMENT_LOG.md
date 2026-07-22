@@ -202,6 +202,19 @@ alteração local foi perdida.
 - Testes: 20/20 backend modular, 3/3 legados, 5/5 frontend, compileall e build
   Vite aprovados.
 
+## 2026-07-22 - OS, recepção, triagem, tarefas e timeline
+
+- Publicada a revisão `f2c3d4e5a601` com campos operacionais da OS, SLA,
+  `service_order_tasks` e `service_order_triage`; ciclo Alembic reversível
+  aprovado.
+- Implementadas APIs para abertura pela conversa, numeração transacional,
+  vínculo de workflow, detalhe, triagem, tarefas, estados e timeline interna ou
+  pública. Eventos públicos usam o outbox Telegram existente.
+- Frontend React ganhou lista/detalhe de OS, status, prioridade, SLA, triagem,
+  tarefas e timeline.
+- Testes: 21/21 backend modular, 3/3 legados, 5/5 frontend, compileall e
+  build Vite aprovados.
+
 ## 2026-07-22 - Handoff da seção: OS em preparação
 
 - A seção foi encerrada após os commits publicados `20e1b8f`, `4d9e760`,

@@ -50,6 +50,8 @@ Implementado neste corte:
   contatos, endereços e interface de clientes;
 - catálogos tenant-scoped de categorias, marcas e modelos, equipamentos
   completos, acessórios e interface React de equipamentos;
+- operações de OS com abertura pela conversa, numeração, vínculo ao workflow,
+  SLA inicial, recepção/triagem, tarefas, timeline interna/pública e tela React;
 
 Ativação externa depende apenas de token autorizado e domínio/TLS. Consulte
 `docs/operations/TELEGRAM_AND_INBOX.md`.

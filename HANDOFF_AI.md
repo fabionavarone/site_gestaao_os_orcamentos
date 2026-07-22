@@ -233,3 +233,11 @@ Depois implementar API/React para criação de OS pela conversa, numeração
 concorrente, atribuição, SLA, recepção/triagem, tarefas, timeline pública/
 interna e testes E2E. Em seguida atualizar os quatro documentos, fazer commit e
 push. A Entrega Vertical 2 permanece aberta.
+
+## Atualização OS - 2026-07-22
+
+A migração `f2c3d4e5a601` e o commit `d160958` entregam OS pela conversa,
+numeração transacional, workflow, SLA inicial, recepção/triagem, tarefas,
+timeline interna/pública e detalhe React. Testes modulares: 21 aprovados; os
+3 legados e 5 frontend permanecem aprovados. Próximo incremento: diagnóstico,
+medições, testes técnicos, checklists e conclusão.

@@ -62,12 +62,15 @@ Documento base:
   estabilizado nem publicado: `models.py` contém campos de contato/endereço,
   conversa, origem, tipo de atendimento, equipe/técnico, SLA e timestamps; a
   migração candidata é `f2c3d4e5a601_service_order_operations.py`.
+- A revisão `f2c3d4e5a601` foi estabilizada e publicada: OS podem ser abertas
+  pela conversa, recebem número transacional, workflow e SLA, e possuem
+  triagem, tarefas, timeline pública/interna e detalhe React.
 
 ## Proximo passo recomendado
 
-Próximo incremento da Entrega Vertical 2: concluir e testar a migração
-`f2c3d4e5a601`, depois implementar API/React de OS, recepção, triagem, tarefas,
-SLA e timeline. Não tratar os arquivos não commitados como concluídos.
+Próximo incremento da Entrega Vertical 2: diagnóstico versionado, medições,
+testes técnicos, checklists e conclusão técnica. A migração `f2c3d4e5a601` está
+publicada.
 Em paralelo, validar pendencias de negocio:
 
 - categorias de equipamento do MVP;
