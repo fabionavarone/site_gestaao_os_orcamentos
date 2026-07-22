@@ -28,6 +28,10 @@ class CompletionOperationsTest(unittest.TestCase):
     def test_delivery_closes_order_and_rejects_duplicate(self):
         deliver=self.endpoint("/api/v1/service-orders/{order_id}/delivery","POST"); result=deliver(self.order["id"],DeliveryPayload(mode="pickup",condition="OK"),self.user,self.db); self.assertEqual(result["status"],"closed")
         with self.assertRaises(HTTPException): deliver(self.order["id"],DeliveryPayload(mode="pickup"),self.user,self.db)
+    def test_assignment_and_sla_pause_resume(self):
+        assignment=self.endpoint("/api/v1/service-orders/{order_id}/assignment","PATCH")
+        result=assignment(self.order["id"],__import__("provisao_api.completion_api",fromlist=["AssignmentPayload"]).AssignmentPayload(technician_id=self.user.id),self.user,self.db); self.assertEqual(result["status"],"assigned")
+        sla=self.endpoint("/api/v1/service-orders/{order_id}/sla/{action}","POST"); paused=sla(self.order["id"],"pause",self.user,self.db); self.assertIsNotNone(paused["sla_paused_at"]); resumed=sla(self.order["id"],"resume",self.user,self.db); self.assertIsNone(resumed["sla_paused_at"])
     def test_completion_requires_approved_diagnosis(self):
         complete=self.endpoint("/api/v1/service-orders/{order_id}/complete","POST")
         with self.assertRaises(HTTPException): complete(self.order["id"],CompletePayload(),self.user,self.db)

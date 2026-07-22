@@ -6,7 +6,7 @@ from pydantic import BaseModel, ConfigDict, Field
 from sqlalchemy import func, select
 from sqlalchemy.orm import Session
 from .db import SessionLocal
-from .models import (Channel, Conversation, ServiceOrder, ServiceOrderChecklist, ServiceOrderDelivery, ServiceOrderDiagnosis, ServiceOrderEvent, ServiceOrderSequence, ServiceOrderTask, ServiceOrderWorkSession, ServiceVisit, User, Warranty, WarrantyReturn)
+from .models import (Channel, Conversation, ServiceOrder, ServiceOrderChecklist, ServiceOrderDelivery, ServiceOrderDiagnosis, ServiceOrderEvent, ServiceOrderSequence, ServiceOrderTask, ServiceOrderWorkSession, ServiceVisit, Team, User, Warranty, WarrantyReturn)
 from .services.conversations import queue_outbound_message
 
 def db():
@@ -31,6 +31,9 @@ class ReturnPayload(BaseModel):
     reason: str=Field(min_length=3,max_length=3000)
 class CompletePayload(BaseModel):
     notes: str|None = Field(default=None, max_length=5000)
+class AssignmentPayload(BaseModel):
+    team_id: str|None = None
+    technician_id: str|None = None
 
 def build_router(current_user:Callable,require:Callable,audit:Callable)->APIRouter:
     router=APIRouter(prefix="/api/v1/service-orders",tags=["completion"])
@@ -45,6 +48,23 @@ def build_router(current_user:Callable,require:Callable,audit:Callable)->APIRout
         if conversation and channel and channel.kind=="telegram":
             queue_outbound_message(session, conversation=conversation, channel=channel, author_name="Provisão", body=body, idempotency_key=f"os-public:{order.id}:{body[:40]}", bot_id=conversation.bot_id)
     def view(x): return {"id":x.id,"service_order_id":x.service_order_id,"mode":x.mode,"technician_id":x.technician_id,"status":x.status,"started_at":x.started_at,"paused_at":x.paused_at,"ended_at":x.ended_at,"result":x.result,"notes":x.notes}
+    @router.patch("/{order_id}/assignment")
+    def assign(order_id: str, payload: AssignmentPayload, user: User = Depends(require("service_order.assign")), session: Session = Depends(db)):
+        order=owned(session,user,order_id)
+        if payload.team_id and not session.scalar(select(Team).where(Team.id==payload.team_id,Team.company_id==user.company_id)): raise HTTPException(404,"team not found")
+        if payload.technician_id and not session.scalar(select(User).where(User.id==payload.technician_id,User.company_id==user.company_id,User.active.is_(True))): raise HTTPException(404,"technician not found")
+        order.team_id=payload.team_id;order.technician_id=payload.technician_id;order.responsible_id=payload.technician_id or order.responsible_id;order.status="assigned";session.add(ServiceOrderEvent(service_order_id=order.id,actor_id=user.id,event_type="assigned",detail=f"team:{payload.team_id or '-'} technician:{payload.technician_id or '-'}"));audit(session,user,"service_order_assigned","service_order",order.id,payload.model_dump());session.commit();return {"id":order.id,"team_id":order.team_id,"technician_id":order.technician_id,"status":order.status}
+    @router.post("/{order_id}/sla/{action}")
+    def sla(order_id: str, action: str, user: User = Depends(require("sla.manage")), session: Session = Depends(db)):
+        if action not in {"pause","resume"}: raise HTTPException(404,"unknown SLA action")
+        order=owned(session,user,order_id)
+        if action=="pause": order.sla_paused_at=datetime.now(UTC)
+        else:
+            if order.sla_paused_at and order.sla_due_at:
+                paused_at = order.sla_paused_at if order.sla_paused_at.tzinfo else order.sla_paused_at.replace(tzinfo=UTC)
+                order.sla_due_at += datetime.now(UTC)-paused_at
+            order.sla_paused_at=None
+        session.add(ServiceOrderEvent(service_order_id=order.id,actor_id=user.id,event_type=f"sla_{action}",detail=f"SLA {action}"));audit(session,user,f"service_order_sla_{action}","service_order",order.id);session.commit();return {"id":order.id,"sla_paused_at":order.sla_paused_at,"sla_due_at":order.sla_due_at}
     @router.post("/{order_id}/work-sessions",status_code=201)
     def start(order_id:str,payload:WorkPayload,user:User=Depends(require("bench_service.manage")),session:Session=Depends(db)):
         order=owned(session,user,order_id)

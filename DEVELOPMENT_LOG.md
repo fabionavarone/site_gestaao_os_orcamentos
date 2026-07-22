@@ -296,3 +296,5 @@ alteração local foi perdida.
   bloqueia tarefas ou checklists pendentes antes de mudar a OS para `completed`.
 - Frontend adicionou a tela Atendimento com seleção de OS e ações reais para
   sessão, conclusão técnica, visita e retirada. Frontend 5/5 e build passaram.
+- API também suporta atribuição tenant-scoped de equipe/técnico e pausa/retomada
+  de SLA com ajuste determinístico do vencimento; regressão backend 28/28.

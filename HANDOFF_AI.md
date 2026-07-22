@@ -333,6 +333,9 @@ O frontend agora inclui a aba Atendimento, conectada às APIs de sessão,
 conclusão, visita e retirada. Próximos pontos: telas de garantia/retorno,
 workflow final e E2E de toda a cadeia.
 
+A API de atendimento também expõe atribuição de equipe/técnico e pausa/retomada
+de SLA; o cálculo trata timestamps ingênuos e timezone-aware.
+
 ## Atualização de atendimento e garantia - 2026-07-22
 
 Foi iniciado o incremento seguinte com `completion_api.py` e a migração
