@@ -202,6 +202,22 @@ alteração local foi perdida.
 - Testes: 20/20 backend modular, 3/3 legados, 5/5 frontend, compileall e build
   Vite aprovados.
 
+## 2026-07-22 - Handoff da seção: OS em preparação
+
+- A seção foi encerrada após os commits publicados `20e1b8f`, `4d9e760`,
+  `3d06aad` e `411a2d9`.
+- Estado publicado e validado: workflow persistente/versionado, CRM PF/PJ com
+  contatos/endereço/duplicidade, catálogos de equipamento, equipamentos,
+  acessórios, frontend Clientes/Equipamentos, Telegram da Entrega 1 intacto.
+- Testes publicados: 20 backend modular, 3 legados, 5 frontend; builds Vite,
+  compileall e ciclos Alembic CRM/equipamentos aprovados.
+- Há trabalho local não commitado iniciado para OS: alteração em
+  `apps/api/provisao_api/models.py` e migração
+  `migrations/versions/f2c3d4e5a601_service_order_operations.py`, adicionando
+  campos de operação/SLA, `service_order_tasks` e `service_order_triage`.
+  Essa migração ainda precisa passar upgrade/downgrade/upgrade e revisão de
+  constraints antes de commit.
+
 ## 2026-07-22 - Workflow persistente da Entrega Vertical 2
 
 - Criada revisão `c4f23b1a9d02` com definições, versões, estados, transições,

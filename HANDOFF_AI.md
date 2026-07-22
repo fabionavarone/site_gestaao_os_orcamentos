@@ -191,3 +191,45 @@ A revisão `e1b6c7d8f902` e o incremento atual entregam categorias, marcas,
 modelos, equipamentos completos, acessórios, prevenção de duplicidade e tela
 React Equipamentos. A suíte modular está em 20 testes aprovados; a próxima
 unidade é OS pela conversa, recepção, triagem e timeline técnica.
+
+## Handoff de encerramento da seção - 2026-07-22
+
+### Estado Git
+
+Branch `main` está sincronizada com `origin/main` no commit publicado
+`20e1b8f feat: deliver equipment catalogs and accessories`. Há alterações locais
+intencionais ainda não commitadas:
+
+- `apps/api/provisao_api/models.py` — campos operacionais adicionais em
+  `ServiceOrder`, mais `ServiceOrderTask` e `ServiceOrderTriage`;
+- `migrations/versions/f2c3d4e5a601_service_order_operations.py` — migração
+  candidata para esses campos/tabelas.
+
+Não declarar essa unidade concluída antes de corrigir/testar a migração.
+
+### Evidências publicadas
+
+- Workflow: commits `17865b8`, `8cd4676`, `a9d9488`, `8fc01e4`.
+- CRM: commits `411a2d9`, `3d06aad`, `4d9e760`; revisão `d7a8e2c4b901`.
+- Equipamentos: commit `20e1b8f`; revisão `e1b6c7d8f902`.
+- Testes: `PYTHONPATH=apps/api .venv/bin/python -m unittest discover -s apps/api/tests -v` → 20 aprovados; `make test` → 3 aprovados; `frontend-web/npm test` → 5 aprovados; `npm run build` aprovado; `compileall` aprovado.
+- Alembic CRM/equipamentos: upgrade → downgrade → upgrade aprovado em SQLite temporário.
+
+### Retomada exata
+
+```bash
+cd /opt/provisao/site_gestaao_os_orcamentos
+pwd
+git status --short --branch
+git diff --check
+PYTHONPATH=apps/api .venv/bin/python -m compileall -q apps/api/provisao_api
+tmp_db=$(mktemp /tmp/provisao-os-XXXXXX.db)
+APP_SECRET_KEY=test-secret-with-sufficient-length DATABASE_URL=sqlite+pysqlite:///$tmp_db REDIS_URL=redis://localhost:6379/0 PYTHONPATH=apps/api .venv/bin/alembic upgrade head
+APP_SECRET_KEY=test-secret-with-sufficient-length DATABASE_URL=sqlite+pysqlite:///$tmp_db REDIS_URL=redis://localhost:6379/0 PYTHONPATH=apps/api .venv/bin/alembic downgrade e1b6c7d8f902
+APP_SECRET_KEY=test-secret-with-sufficient-length DATABASE_URL=sqlite+pysqlite:///$tmp_db REDIS_URL=redis://localhost:6379/0 PYTHONPATH=apps/api .venv/bin/alembic upgrade head
+```
+
+Depois implementar API/React para criação de OS pela conversa, numeração
+concorrente, atribuição, SLA, recepção/triagem, tarefas, timeline pública/
+interna e testes E2E. Em seguida atualizar os quatro documentos, fazer commit e
+push. A Entrega Vertical 2 permanece aberta.

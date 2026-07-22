@@ -58,11 +58,16 @@ Documento base:
 - A revisão `e1b6c7d8f902` adiciona categorias, marcas, modelos, campos
   completos do equipamento e acessórios; APIs `/api/v1/equipment` e tela
   Equipamentos usam as mesmas regras de empresa e auditoria.
+- O próximo incremento de OS foi iniciado localmente, mas ainda não está
+  estabilizado nem publicado: `models.py` contém campos de contato/endereço,
+  conversa, origem, tipo de atendimento, equipe/técnico, SLA e timestamps; a
+  migração candidata é `f2c3d4e5a601_service_order_operations.py`.
 
 ## Proximo passo recomendado
 
-Próximo incremento da Entrega Vertical 2: OS completa pela conversa, recepção,
-triagem e timeline técnica. CRM, catálogos e workflow permanecem validados.
+Próximo incremento da Entrega Vertical 2: concluir e testar a migração
+`f2c3d4e5a601`, depois implementar API/React de OS, recepção, triagem, tarefas,
+SLA e timeline. Não tratar os arquivos não commitados como concluídos.
 Em paralelo, validar pendencias de negocio:
 
 - categorias de equipamento do MVP;

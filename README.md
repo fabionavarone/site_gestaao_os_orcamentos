@@ -57,6 +57,9 @@ Ativação externa depende apenas de token autorizado e domínio/TLS. Consulte
 Operação do motor de fluxo: `docs/operations/WORKFLOW.md`.
 Operação do CRM: APIs em `/api/v1/crm` e tela Clientes no painel Web.
 
+Handoff da seção atual: `HANDOFF_AI.md` registra o estado exato da Entrega
+Vertical 2 e a retomada do incremento de OS.
+
 ## Regras
 
 - Trabalhar somente dentro deste diretorio.
