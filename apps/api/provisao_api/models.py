@@ -292,7 +292,14 @@ class ServiceOrder(Base):
     priority: Mapped[str] = mapped_column(String(20), default="normal")
     status: Mapped[str] = mapped_column(String(40), default="draft", index=True)
     version: Mapped[int] = mapped_column(Integer, default=1)
+    workflow_instance_id: Mapped[str | None] = mapped_column(ForeignKey("workflow_instances.id"), index=True)
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())
+    updated_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now(), onupdate=func.now())
+
+class ServiceOrderSequence(Base):
+    __tablename__ = "service_order_sequences"
+    company_id: Mapped[str] = mapped_column(ForeignKey("companies.id"), primary_key=True)
+    next_number: Mapped[int] = mapped_column(Integer, default=1)
     updated_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now(), onupdate=func.now())
 
 class AuditLog(Base):
@@ -305,3 +312,105 @@ class AuditLog(Base):
     entity_id: Mapped[str] = mapped_column(String(36))
     detail: Mapped[dict] = mapped_column(JSON, default=dict)
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())
+
+class WorkflowDefinition(Base):
+    __tablename__ = "workflow_definitions"
+    id: Mapped[str] = mapped_column(String(36), primary_key=True, default=uid)
+    company_id: Mapped[str] = mapped_column(ForeignKey("companies.id"), index=True)
+    code: Mapped[str] = mapped_column(String(80))
+    name: Mapped[str] = mapped_column(String(160))
+    description: Mapped[str | None] = mapped_column(Text)
+    entity_type: Mapped[str] = mapped_column(String(80), default="service_order")
+    status: Mapped[str] = mapped_column(String(20), default="draft", index=True)
+    created_by: Mapped[str | None] = mapped_column(ForeignKey("users.id"))
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())
+    updated_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now(), onupdate=func.now())
+    __table_args__ = (UniqueConstraint("company_id", "code"), CheckConstraint("status IN ('draft','active','inactive','archived')", name="workflow_definition_status"))
+
+class WorkflowVersion(Base):
+    __tablename__ = "workflow_versions"
+    id: Mapped[str] = mapped_column(String(36), primary_key=True, default=uid)
+    workflow_definition_id: Mapped[str] = mapped_column(ForeignKey("workflow_definitions.id", ondelete="CASCADE"), index=True)
+    version_number: Mapped[int] = mapped_column(Integer)
+    status: Mapped[str] = mapped_column(String(20), default="draft", index=True)
+    description: Mapped[str | None] = mapped_column(Text)
+    created_by: Mapped[str | None] = mapped_column(ForeignKey("users.id"))
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())
+    published_by: Mapped[str | None] = mapped_column(ForeignKey("users.id"))
+    published_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
+    superseded_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
+    __table_args__ = (UniqueConstraint("workflow_definition_id", "version_number"), CheckConstraint("status IN ('draft','published','superseded','archived')", name="workflow_version_status"))
+
+class WorkflowState(Base):
+    __tablename__ = "workflow_states"
+    id: Mapped[str] = mapped_column(String(36), primary_key=True, default=uid)
+    workflow_version_id: Mapped[str] = mapped_column(ForeignKey("workflow_versions.id", ondelete="CASCADE"), index=True)
+    code: Mapped[str] = mapped_column(String(80))
+    name: Mapped[str] = mapped_column(String(160))
+    description: Mapped[str | None] = mapped_column(Text)
+    category: Mapped[str] = mapped_column(String(30))
+    is_initial: Mapped[bool] = mapped_column(Boolean, default=False)
+    is_terminal: Mapped[bool] = mapped_column(Boolean, default=False)
+    is_public: Mapped[bool] = mapped_column(Boolean, default=False)
+    position: Mapped[int] = mapped_column(Integer, default=0)
+    metadata_json: Mapped[dict] = mapped_column("metadata", JSON, default=dict)
+    __table_args__ = (UniqueConstraint("workflow_version_id", "code"),)
+
+class WorkflowTransition(Base):
+    __tablename__ = "workflow_transitions"
+    id: Mapped[str] = mapped_column(String(36), primary_key=True, default=uid)
+    workflow_version_id: Mapped[str] = mapped_column(ForeignKey("workflow_versions.id", ondelete="CASCADE"), index=True)
+    code: Mapped[str] = mapped_column(String(80))
+    name: Mapped[str] = mapped_column(String(160))
+    from_state_id: Mapped[str] = mapped_column(ForeignKey("workflow_states.id"), index=True)
+    to_state_id: Mapped[str] = mapped_column(ForeignKey("workflow_states.id"), index=True)
+    required_permission: Mapped[str | None] = mapped_column(String(100))
+    requires_reason: Mapped[bool] = mapped_column(Boolean, default=False)
+    requires_assignment: Mapped[bool] = mapped_column(Boolean, default=False)
+    requires_checklist_completion: Mapped[bool] = mapped_column(Boolean, default=False)
+    requires_diagnosis: Mapped[bool] = mapped_column(Boolean, default=False)
+    requires_customer_notification: Mapped[bool] = mapped_column(Boolean, default=False)
+    conditions: Mapped[dict] = mapped_column(JSON, default=dict)
+    actions: Mapped[list] = mapped_column(JSON, default=list)
+    active: Mapped[bool] = mapped_column(Boolean, default=True)
+    position: Mapped[int] = mapped_column(Integer, default=0)
+    __table_args__ = (UniqueConstraint("workflow_version_id", "code"), CheckConstraint("from_state_id <> to_state_id", name="workflow_transition_distinct_states"))
+
+class WorkflowInstance(Base):
+    __tablename__ = "workflow_instances"
+    id: Mapped[str] = mapped_column(String(36), primary_key=True, default=uid)
+    company_id: Mapped[str] = mapped_column(ForeignKey("companies.id"), index=True)
+    workflow_version_id: Mapped[str] = mapped_column(ForeignKey("workflow_versions.id"), index=True)
+    entity_type: Mapped[str] = mapped_column(String(80))
+    entity_id: Mapped[str] = mapped_column(String(36), index=True)
+    current_state_id: Mapped[str] = mapped_column(ForeignKey("workflow_states.id"), index=True)
+    status: Mapped[str] = mapped_column(String(20), default="running", index=True)
+    started_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())
+    paused_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
+    completed_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
+    metadata_json: Mapped[dict] = mapped_column("metadata", JSON, default=dict)
+    __table_args__ = (UniqueConstraint("company_id", "entity_type", "entity_id"), CheckConstraint("status IN ('running','paused','completed','cancelled')", name="workflow_instance_status"))
+
+class WorkflowExecutionEvent(Base):
+    __tablename__ = "workflow_execution_events"
+    id: Mapped[str] = mapped_column(String(36), primary_key=True, default=uid)
+    workflow_instance_id: Mapped[str] = mapped_column(ForeignKey("workflow_instances.id", ondelete="CASCADE"), index=True)
+    transition_id: Mapped[str | None] = mapped_column(ForeignKey("workflow_transitions.id"), index=True)
+    from_state_id: Mapped[str | None] = mapped_column(ForeignKey("workflow_states.id"))
+    to_state_id: Mapped[str] = mapped_column(ForeignKey("workflow_states.id"))
+    performed_by: Mapped[str | None] = mapped_column(ForeignKey("users.id"))
+    reason: Mapped[str | None] = mapped_column(Text)
+    context: Mapped[dict] = mapped_column(JSON, default=dict)
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())
+
+class WorkflowActionExecution(Base):
+    __tablename__ = "workflow_action_executions"
+    id: Mapped[str] = mapped_column(String(36), primary_key=True, default=uid)
+    workflow_execution_event_id: Mapped[str] = mapped_column(ForeignKey("workflow_execution_events.id", ondelete="CASCADE"), index=True)
+    action_type: Mapped[str] = mapped_column(String(80))
+    status: Mapped[str] = mapped_column(String(20), default="pending", index=True)
+    attempts: Mapped[int] = mapped_column(Integer, default=0)
+    result: Mapped[dict] = mapped_column(JSON, default=dict)
+    error: Mapped[str | None] = mapped_column(Text)
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())
+    completed_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
