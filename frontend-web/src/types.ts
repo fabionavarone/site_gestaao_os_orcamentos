@@ -6,3 +6,4 @@ export type Outbox={id:string;conversation_id:string;message_id:string;operation
 export type InboxEvent={id:string;bot_id:string;external_event_id:string;status:string;attempts:number;error?:string;received_at:string;processed_at?:string};
 export type SelectOption={id:string;label:string};
 export type ConversationOptions={users:SelectOption[];teams:SelectOption[];customers:SelectOption[];equipment:SelectOption[];service_orders:SelectOption[]};
+export type Customer={id:string;name:string;customer_type:string;document?:string;email?:string;phone?:string;status:string;contacts?:{id:string;name:string;email?:string;phone?:string}[];addresses?:{id:string;street:string;city:string;state:string}[]};

@@ -37,4 +37,10 @@ def downgrade():
     op.drop_table("customer_contacts")
     for column in ("normalized_phone","normalized_email","normalized_document","owner_id","branch_id","status","customer_type"):op.drop_index(f"ix_customers_{column}",table_name="customers")
     with op.batch_alter_table("customers") as batch:
+        # The project metadata naming convention prefixes explicit check names
+        # on SQLite batch tables; remove both foreign keys and checks before
+        # dropping their columns so downgrade remains reversible.
+        for name, kind in (("fk_customers_branch_id_branches", "foreignkey"), ("fk_customers_owner_id_users", "foreignkey"), ("ck_customers_customer_type", "check"), ("ck_customers_customer_status", "check"), ("uq_customers_company_normalized_document", "unique")):
+            try: batch.drop_constraint(name, type_=kind)
+            except Exception: pass
         for column in ("updated_at","normalized_phone","normalized_email","normalized_document","source","owner_id","branch_id","tags","status","notes","whatsapp","state_registration","trade_name","legal_name","customer_type"):batch.drop_column(column)

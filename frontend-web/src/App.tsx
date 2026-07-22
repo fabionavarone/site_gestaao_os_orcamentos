@@ -4,7 +4,7 @@ import { useForm } from 'react-hook-form';
 import { z } from 'zod';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { api, login, User } from './api';
-import { Bot, Conversation, ConversationOptions, Detail, InboxEvent, Outbox, SelectOption } from './types';
+import { Bot, Conversation, ConversationOptions, Customer, Detail, InboxEvent, Outbox, SelectOption } from './types';
 import Workflows from './Workflows';
 
 const loginSchema = z.object({
@@ -186,10 +186,22 @@ function Deliveries() {
   </div>;
 }
 
+function Customers() {
+  const queryClient = useQueryClient();
+  const [query, setQuery] = useState(''); const [selected, setSelected] = useState<string>(); const [name, setName] = useState(''); const [document, setDocument] = useState(''); const [email, setEmail] = useState(''); const [phone, setPhone] = useState('');
+  const customers = useQuery({ queryKey: ['crm-customers', query], queryFn: () => api<{ items: Customer[] }>(`/crm/customers?q=${encodeURIComponent(query)}`) });
+  const detail = useQuery({ queryKey: ['crm-customer', selected], queryFn: () => api<Customer>(`/crm/customers/${selected}`), enabled: Boolean(selected) });
+  const create = useMutation({ mutationFn: () => api('/crm/customers', { method: 'POST', body: JSON.stringify({ name, document: document || null, email: email || null, phone: phone || null }) }), onSuccess: () => { setName(''); setDocument(''); setEmail(''); setPhone(''); queryClient.invalidateQueries({ queryKey: ['crm-customers'] }); } });
+  return <div className="grid gap-4 lg:grid-cols-[22rem_1fr]">
+    <section className="card"><h2 className="text-xl font-semibold">Clientes</h2><input className="my-3 w-full" aria-label="Buscar cliente" placeholder="Nome, documento ou contato" value={query} onChange={event => setQuery(event.target.value)} /><div className="space-y-2">{customers.data?.items.map(customer => <button key={customer.id} className="w-full bg-white text-left" onClick={() => setSelected(customer.id)}><span className="font-medium">{customer.name}</span><span className="float-right badge">{customer.status}</span><span className="block muted">{customer.document || customer.email || 'sem documento'}</span></button>)}{customers.data?.items.length === 0 && <p className="muted">Nenhum cliente encontrado.</p>}</div></section>
+    <section className="card space-y-3"><h2 className="text-xl font-semibold">Novo cliente</h2><div className="grid gap-2 md:grid-cols-2"><input aria-label="Nome do cliente" placeholder="Nome ou razão social" value={name} onChange={event => setName(event.target.value)} /><input aria-label="CPF ou CNPJ" placeholder="CPF/CNPJ" value={document} onChange={event => setDocument(event.target.value)} /><input aria-label="E-mail do cliente" placeholder="E-mail" value={email} onChange={event => setEmail(event.target.value)} /><input aria-label="Telefone do cliente" placeholder="Telefone" value={phone} onChange={event => setPhone(event.target.value)} /></div><button disabled={!name || create.isPending} onClick={() => create.mutate()}>Cadastrar cliente</button>{create.error && <p role="alert" className="text-red-700">{(create.error as Error).message}</p>}{detail.data && <div className="border-t pt-3"><h3 className="font-semibold">{detail.data.name}</h3><p className="muted">{detail.data.email || 'sem e-mail'} · {detail.data.phone || 'sem telefone'}</p><h4 className="mt-3 font-medium">Contatos ({detail.data.contacts?.length || 0})</h4>{detail.data.contacts?.map(contact => <p key={contact.id}>{contact.name} · {contact.email || contact.phone || 'sem contato'}</p>)}<h4 className="mt-3 font-medium">Endereços ({detail.data.addresses?.length || 0})</h4>{detail.data.addresses?.map(address => <p key={address.id}>{address.street}, {address.city}/{address.state}</p>)}</div>}</section>
+  </div>;
+}
+
 export default function App() {
-  const [user, setUser] = useState<User>(); const [checking, setChecking] = useState(true); const [tab, setTab] = useState<'inbox' | 'bots' | 'deliveries' | 'workflows'>('inbox');
+  const [user, setUser] = useState<User>(); const [checking, setChecking] = useState(true); const [tab, setTab] = useState<'inbox' | 'bots' | 'deliveries' | 'workflows' | 'customers'>('inbox');
   useEffect(() => { api<{ user: User }>('/auth/me').then(result => setUser(result.user)).catch(() => {}).finally(() => setChecking(false)); }, []);
   if (checking) return <main className="grid min-h-screen place-items-center">Carregando…</main>;
   if (!user) return <Login onLogin={setUser} />;
-  return <div className="min-h-screen"><header className="border-b bg-white"><div className="mx-auto flex max-w-7xl flex-wrap items-center justify-between gap-3 p-4"><div><strong>Provisão Manager</strong><span className="ml-2 muted">{user.name}</span></div><nav aria-label="Principal" className="flex flex-wrap gap-2"><button onClick={() => setTab('inbox')}>Inbox</button><button onClick={() => setTab('bots')}>Bots</button><button onClick={() => setTab('deliveries')}>Entregas</button><button onClick={() => setTab('workflows')}>Workflows</button><button className="bg-slate-600" onClick={async () => { await api('/auth/logout', { method: 'POST' }); setUser(undefined); }}>Sair</button></nav></div></header><main className="mx-auto max-w-7xl p-4">{tab === 'inbox' ? <Inbox /> : tab === 'bots' ? <Bots /> : tab === 'deliveries' ? <Deliveries /> : <Workflows />}</main></div>;
+  return <div className="min-h-screen"><header className="border-b bg-white"><div className="mx-auto flex max-w-7xl flex-wrap items-center justify-between gap-3 p-4"><div><strong>Provisão Manager</strong><span className="ml-2 muted">{user.name}</span></div><nav aria-label="Principal" className="flex flex-wrap gap-2"><button onClick={() => setTab('inbox')}>Inbox</button><button onClick={() => setTab('customers')}>Clientes</button><button onClick={() => setTab('bots')}>Bots</button><button onClick={() => setTab('deliveries')}>Entregas</button><button onClick={() => setTab('workflows')}>Workflows</button><button className="bg-slate-600" onClick={async () => { await api('/auth/logout', { method: 'POST' }); setUser(undefined); }}>Sair</button></nav></div></header><main className="mx-auto max-w-7xl p-4">{tab === 'inbox' ? <Inbox /> : tab === 'customers' ? <Customers /> : tab === 'bots' ? <Bots /> : tab === 'deliveries' ? <Deliveries /> : <Workflows />}</main></div>;
 }
