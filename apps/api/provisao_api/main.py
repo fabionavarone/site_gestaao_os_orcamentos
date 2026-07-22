@@ -273,6 +273,15 @@ def inbox(status_filter: str | None = None, channel: str | None=None, bot_id: st
     items=session.scalars(statement).all()
     return {"items":[{"id":item.id,"channel":item.channel,"bot_id":item.bot_id,"subject":item.subject,"status":item.status,"priority":item.priority,"assigned_to":item.assigned_to,"assigned_team_id":item.assigned_team_id,"automation_paused":item.automation_paused,"unread_count":item.unread_count,"last_message_at":item.last_message_at} for item in items],"page":max(page,1),"limit":min(limit,100)}
 
+@app.get("/api/v1/conversation-options")
+def conversation_options(user:User=Depends(current_user),session:Session=Depends(db)):
+    users=session.scalars(select(User).where(User.company_id==user.company_id,User.active.is_(True)).order_by(User.name).limit(200)).all()
+    teams=session.scalars(select(Team).where(Team.company_id==user.company_id,Team.active.is_(True)).order_by(Team.name).limit(200)).all()
+    customers=session.scalars(select(Customer).where(Customer.company_id==user.company_id).order_by(Customer.name).limit(200)).all()
+    equipment=session.scalars(select(Equipment).where(Equipment.company_id==user.company_id).order_by(Equipment.category,Equipment.model).limit(200)).all()
+    orders=session.scalars(select(ServiceOrder).where(ServiceOrder.company_id==user.company_id).order_by(ServiceOrder.number.desc()).limit(200)).all()
+    return {"users":[{"id":item.id,"label":item.name} for item in users],"teams":[{"id":item.id,"label":item.name} for item in teams],"customers":[{"id":item.id,"label":item.name} for item in customers],"equipment":[{"id":item.id,"label":" · ".join(filter(None,[item.category,item.manufacturer,item.model,item.serial_number]))} for item in equipment],"service_orders":[{"id":item.id,"label":f"OS {item.number} · {item.title}"} for item in orders]}
+
 @app.get("/api/v1/conversations/{conversation_id}")
 def conversation_detail(conversation_id:str,user:User=Depends(current_user),session:Session=Depends(db)):
     item=session.scalar(select(Conversation).where(Conversation.id==conversation_id,Conversation.company_id==user.company_id))
@@ -281,7 +290,7 @@ def conversation_detail(conversation_id:str,user:User=Depends(current_user),sess
     attachments=session.scalars(select(Attachment).where(Attachment.conversation_id==item.id,Attachment.deleted_at.is_(None))).all(); by_message={}
     for attachment in attachments: by_message.setdefault(attachment.message_id,[]).append({"id":attachment.id,"filename":attachment.original_filename or attachment.safe_filename,"mime_type":attachment.detected_mime_type,"size_bytes":attachment.size_bytes})
     item.unread_count=0; session.commit()
-    return {"id":item.id,"subject":item.subject,"channel":item.channel,"bot_id":item.bot_id,"status":item.status,"priority":item.priority,"assigned_to":item.assigned_to,"assigned_team_id":item.assigned_team_id,"automation_paused":item.automation_paused,"customer_id":item.customer_id,"messages":[{"id":m.id,"direction":m.direction,"type":m.message_type,"status":m.status,"author_name":m.author_name,"text":m.body,"internal":m.internal,"attempts":session.scalar(select(func.max(OutboxEvent.attempts)).where(OutboxEvent.message_id==m.id)) or 0,"created_at":m.created_at,"sent_at":m.sent_at,"failed_at":m.failed_at,"attachments":by_message.get(m.id,[])} for m in messages]}
+    return {"id":item.id,"subject":item.subject,"channel":item.channel,"bot_id":item.bot_id,"status":item.status,"priority":item.priority,"assigned_to":item.assigned_to,"assigned_team_id":item.assigned_team_id,"automation_paused":item.automation_paused,"customer_id":item.customer_id,"equipment_id":item.equipment_id,"service_order_id":item.service_order_id,"updated_at":item.updated_at,"messages":[{"id":m.id,"direction":m.direction,"type":m.message_type,"status":m.status,"author_name":m.author_name,"text":m.body,"internal":m.internal,"attempts":session.scalar(select(func.max(OutboxEvent.attempts)).where(OutboxEvent.message_id==m.id)) or 0,"created_at":m.created_at,"sent_at":m.sent_at,"failed_at":m.failed_at,"attachments":by_message.get(m.id,[])} for m in messages]}
 
 @app.post("/api/v1/conversations/{conversation_id}/state")
 def change_conversation_state(conversation_id:str,payload:ConversationStateIn,user:User=Depends(current_user),session:Session=Depends(db)):

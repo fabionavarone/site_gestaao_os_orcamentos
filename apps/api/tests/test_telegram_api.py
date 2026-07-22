@@ -12,6 +12,7 @@ os.environ.setdefault("TELEGRAM_TOKEN_ENCRYPTION_KEY","InHwts8E1W6J6PyE8QXIkYTiX
 from fastapi import HTTPException
 from starlette.requests import Request
 from provisao_api.db import Base,SessionLocal,engine
+from provisao_api.config import settings
 from provisao_api.main import BotCreateIn,create_bot,telegram_webhook,token_hash
 from provisao_api.models import Channel,ChannelBot,Company,ExternalEvent,User
 
@@ -29,6 +30,7 @@ class TelegramApiTest(unittest.IsolatedAsyncioTestCase):
     @classmethod
     def setUpClass(cls): Base.metadata.create_all(engine)
     def setUp(self):
+        os.environ["TELEGRAM_TOKEN_ENCRYPTION_KEY"]="InHwts8E1W6J6PyE8QXIkYTiX-c6jOi4E2vNT6Gf0lA=";settings.cache_clear()
         self.db=SessionLocal();company=Company(name=f"API {uuid.uuid4()}");self.db.add(company);self.db.flush();self.user=User(company_id=company.id,email=f"admin-{uuid.uuid4()}@example.test",name="Admin",password_hash="unused");self.db.add(self.user);self.db.commit();self.company_id=company.id
     def tearDown(self):self.db.rollback();self.db.close()
 
