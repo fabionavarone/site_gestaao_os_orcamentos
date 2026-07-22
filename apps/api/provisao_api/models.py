@@ -116,6 +116,47 @@ class Conversation(Base):
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())
     updated_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now(), onupdate=func.now())
 
+class Channel(Base):
+    __tablename__ = "channels"
+    id: Mapped[str] = mapped_column(String(36), primary_key=True, default=uid)
+    company_id: Mapped[str] = mapped_column(ForeignKey("companies.id"), index=True)
+    kind: Mapped[str] = mapped_column(String(32), index=True)
+    name: Mapped[str] = mapped_column(String(160))
+    active: Mapped[bool] = mapped_column(Boolean, default=True)
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())
+    __table_args__ = (UniqueConstraint("company_id", "kind", "name"),)
+
+class ChannelBot(Base):
+    __tablename__ = "channel_bots"
+    id: Mapped[str] = mapped_column(String(36), primary_key=True, default=uid)
+    company_id: Mapped[str] = mapped_column(ForeignKey("companies.id"), index=True)
+    channel_id: Mapped[str] = mapped_column(ForeignKey("channels.id"), index=True)
+    name: Mapped[str] = mapped_column(String(160))
+    active: Mapped[bool] = mapped_column(Boolean, default=False)
+    token_ciphertext: Mapped[str | None] = mapped_column(Text)
+    webhook_secret_hash: Mapped[str | None] = mapped_column(String(64))
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())
+
+class ExternalIdentity(Base):
+    __tablename__ = "external_identities"
+    id: Mapped[str] = mapped_column(String(36), primary_key=True, default=uid)
+    company_id: Mapped[str] = mapped_column(ForeignKey("companies.id"), index=True)
+    channel_id: Mapped[str] = mapped_column(ForeignKey("channels.id"), index=True)
+    external_id: Mapped[str] = mapped_column(String(160))
+    display_name: Mapped[str | None] = mapped_column(String(160))
+    user_id: Mapped[str | None] = mapped_column(ForeignKey("users.id"), index=True)
+    customer_id: Mapped[str | None] = mapped_column(ForeignKey("customers.id"), index=True)
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())
+    __table_args__ = (UniqueConstraint("channel_id", "external_id"),)
+
+class ConversationParticipant(Base):
+    __tablename__ = "conversation_participants"
+    conversation_id: Mapped[str] = mapped_column(ForeignKey("conversations.id", ondelete="CASCADE"), primary_key=True)
+    external_identity_id: Mapped[str] = mapped_column(ForeignKey("external_identities.id"), primary_key=True)
+    user_id: Mapped[str | None] = mapped_column(ForeignKey("users.id"))
+    role: Mapped[str] = mapped_column(String(32), default="customer")
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())
+
 class ConversationMessage(Base):
     __tablename__ = "conversation_messages"
     id: Mapped[str] = mapped_column(String(36), primary_key=True, default=uid)
@@ -129,6 +170,37 @@ class ConversationMessage(Base):
     metadata_json: Mapped[dict] = mapped_column("metadata", JSON, default=dict)
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())
     __table_args__ = (UniqueConstraint("conversation_id", "external_message_id"),)
+
+class ExternalEvent(Base):
+    __tablename__ = "external_events"
+    id: Mapped[str] = mapped_column(String(36), primary_key=True, default=uid)
+    company_id: Mapped[str] = mapped_column(ForeignKey("companies.id"), index=True)
+    channel_id: Mapped[str] = mapped_column(ForeignKey("channels.id"), index=True)
+    bot_id: Mapped[str | None] = mapped_column(ForeignKey("channel_bots.id"), index=True)
+    external_event_id: Mapped[str] = mapped_column(String(160))
+    idempotency_key: Mapped[str] = mapped_column(String(128), unique=True)
+    payload: Mapped[dict] = mapped_column(JSON, default=dict)
+    received_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())
+    processed_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
+    __table_args__ = (UniqueConstraint("channel_id", "external_event_id"),)
+
+class OutboxEvent(Base):
+    __tablename__ = "outbox_events"
+    id: Mapped[str] = mapped_column(String(36), primary_key=True, default=uid)
+    company_id: Mapped[str] = mapped_column(ForeignKey("companies.id"), index=True)
+    channel_id: Mapped[str] = mapped_column(ForeignKey("channels.id"), index=True)
+    bot_id: Mapped[str | None] = mapped_column(ForeignKey("channel_bots.id"), index=True)
+    conversation_id: Mapped[str] = mapped_column(ForeignKey("conversations.id"), index=True)
+    message_id: Mapped[str | None] = mapped_column(ForeignKey("conversation_messages.id"), index=True)
+    event_type: Mapped[str] = mapped_column(String(64), default="send_message")
+    payload: Mapped[dict] = mapped_column(JSON, default=dict)
+    idempotency_key: Mapped[str] = mapped_column(String(128), unique=True)
+    status: Mapped[str] = mapped_column(String(20), default="pending", index=True)
+    attempts: Mapped[int] = mapped_column(Integer, default=0)
+    available_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now(), index=True)
+    last_error: Mapped[str | None] = mapped_column(Text)
+    delivered_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())
 
 class ServiceOrder(Base):
     __tablename__ = "service_orders"

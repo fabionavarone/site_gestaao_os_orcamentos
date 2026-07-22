@@ -107,3 +107,21 @@ Proximo passo recomendado:
   optimistic locking e registrar historico imutavel de eventos.
 - Criadas APIs para conversas e mensagens Web, separando nota interna de
   mensagem externa e auditando ambas.
+
+## 2026-07-22 - Núcleo omnichannel persistente
+
+- Criada a revisão Alembic `7a91bc4de220`, reversível, para canais, bots,
+  identidades externas, participantes, eventos externos e outbox.
+- Centralizada a ingestão canônica de canais em serviço de aplicação: ela cria
+  identidade e conversa quando necessárias e deduplica por chave de idempotência
+  e por evento externo do canal.
+- Incluídos inbox com filtro, atribuição/pausa/encerramento humano e outbox
+  transacional para respostas externas. O worker usa retry com backoff limitado
+  e dead-letter após cinco falhas; nenhum transporte externo é chamado ainda.
+- Testes aprovados: `test_omnichannel.py` (3 casos), compilação Python e ciclo
+  Alembic upgrade/downgrade/upgrade em SQLite temporário.
+- A suíte ASGI preexistente de segurança excedeu o limite de execução do sandbox
+  durante Argon2; não foi alterada nem marcada como aprovada.
+
+Próximo passo recomendado: implementar gateway Telegram real como adaptador do
+serviço canônico, com token criptografado, webhook validado e contrato local fake.

@@ -36,10 +36,11 @@ Implementado neste corte:
 - testes automatizados sem dependencias externas.
 - API modular para OS com transicoes persistidas, bloqueio otimista e timeline;
 - API de conversas Web com mensagens internas e externas auditadas.
+- núcleo omnichannel persistente: canais, identidades externas, eventos
+  deduplicados, inbox, atribuição humana e outbox com retry/dead-letter.
 
-Ainda requer evolucao antes de producao: upload e arquivos,
-Telegram real com segredos, IA local, documentos, estoque, financeiro, portais,
-backup, observabilidade e politicas de negocio aprovadas.
+O próximo incremento é o gateway Telegram real configurável, que consumirá o
+núcleo omnichannel já persistente. Uploads e anexos continuam pendentes.
 
 ## Regras
 

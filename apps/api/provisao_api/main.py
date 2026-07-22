@@ -9,7 +9,8 @@ from sqlalchemy.orm import Session
 from passlib.context import CryptContext
 from .config import settings
 from .db import Base, engine, SessionLocal
-from .models import AuditLog, Branch, Company, Conversation, ConversationMessage, Customer, Equipment, Role, ServiceOrder, ServiceOrderEvent, Session as UserSession, Team, TeamMember, User, UserRole
+from .models import AuditLog, Branch, Channel, Company, Conversation, ConversationMessage, Customer, Equipment, OutboxEvent, Role, ServiceOrder, ServiceOrderEvent, Session as UserSession, Team, TeamMember, User, UserRole
+from .services.conversations import queue_outbound_message
 
 # OWASP-aligned memory-hard hashing, tuned to the 4-vCPU deployment target.
 pwd = CryptContext(schemes=["argon2"], argon2__memory_cost=19456, argon2__time_cost=2, argon2__parallelism=2, deprecated="auto")
@@ -52,6 +53,8 @@ class OrderIn(BaseModel): customer_id: str; equipment_id: str | None = None; tit
 class TransitionIn(BaseModel): status: str; reason: str | None = Field(default=None,max_length=2000); version: int
 class ConversationIn(BaseModel): subject: str = Field(min_length=2,max_length=240); customer_id: str | None = None; channel: str = Field(default="web", pattern="^(web|telegram)$")
 class MessageIn(BaseModel): body: str = Field(min_length=1,max_length=10000); internal: bool = False
+class AssignmentIn(BaseModel): user_id: str | None = None; status: str = Field(default="human_queue", pattern="^(human_queue|assigned|paused|closed)$")
+class OutboundMessageIn(BaseModel): body: str = Field(min_length=1,max_length=10000); idempotency_key: str = Field(min_length=16,max_length=128)
 ORDER_TRANSITIONS={"draft":{"awaiting_receipt","received","cancelled"},"awaiting_receipt":{"received","cancelled"},"received":{"triage","cancelled"},"triage":{"diagnosis","technical_hold","customer_hold"},"diagnosis":{"awaiting_budget","no_repair_condition","technical_hold"},"awaiting_budget":{"awaiting_customer_approval"},"awaiting_customer_approval":{"approved","rejected","customer_hold"},"approved":{"awaiting_parts","repair_in_progress"},"awaiting_parts":{"repair_in_progress","technical_hold"},"repair_in_progress":{"quality_test","technical_hold"},"quality_test":{"ready_for_delivery","repair_in_progress"},"ready_for_delivery":{"delivered"},"delivered":{"closed","warranty_return"},"rejected":{"closed"},"no_repair_condition":{"closed"},"technical_hold":{"triage","diagnosis","repair_in_progress"},"customer_hold":{"triage","awaiting_customer_approval"},"financial_hold":{"ready_for_delivery","closed"},"warranty_return":{"triage"},"closed":set(),"cancelled":set()}
 
 @asynccontextmanager
@@ -110,6 +113,34 @@ def send_message(conversation_id: str,payload: MessageIn,user: User=Depends(curr
     conversation=session.scalar(select(Conversation).where(Conversation.id==conversation_id,Conversation.company_id==user.company_id))
     if not conversation: raise HTTPException(404,"conversation not found")
     message=ConversationMessage(conversation_id=conversation.id,direction="internal" if payload.internal else "outbound",author_name=user.name,body=payload.body,internal=payload.internal); session.add(message); audit(session,user,"message","conversation",conversation.id,{"internal":payload.internal}); session.commit(); return {"id":message.id}
+
+@app.get("/api/v1/conversations")
+def inbox(status_filter: str | None = None, limit: int = 50, user: User=Depends(current_user), session: Session=Depends(db)):
+    statement=select(Conversation).where(Conversation.company_id == user.company_id).order_by(Conversation.updated_at.desc()).limit(min(limit,100))
+    if status_filter: statement=statement.where(Conversation.status == status_filter)
+    items=session.scalars(statement).all()
+    return {"items":[{"id":item.id,"channel":item.channel,"subject":item.subject,"status":item.status,"assigned_to":item.assigned_to,"automation_paused":item.automation_paused} for item in items]}
+
+@app.post("/api/v1/conversations/{conversation_id}/assignment")
+def assign_conversation(conversation_id: str, payload: AssignmentIn, user: User=Depends(current_user), session: Session=Depends(db)):
+    conversation=session.scalar(select(Conversation).where(Conversation.id==conversation_id,Conversation.company_id==user.company_id))
+    if not conversation: raise HTTPException(404,"conversation not found")
+    if payload.user_id:
+        assignee=session.scalar(select(User).where(User.id==payload.user_id,User.company_id==user.company_id,User.active.is_(True)))
+        if not assignee: raise HTTPException(422,"invalid assignee")
+    conversation.assigned_to=payload.user_id; conversation.status=payload.status; conversation.automation_paused=payload.status in {"assigned","paused"}
+    audit(session,user,"assign","conversation",conversation.id,{"assigned_to":payload.user_id,"status":payload.status}); session.commit()
+    return {"id":conversation.id,"status":conversation.status,"assigned_to":conversation.assigned_to,"automation_paused":conversation.automation_paused}
+
+@app.post("/api/v1/conversations/{conversation_id}/outbound", status_code=201)
+def queue_outbound(conversation_id: str, payload: OutboundMessageIn, user: User=Depends(current_user), session: Session=Depends(db)):
+    conversation=session.scalar(select(Conversation).where(Conversation.id==conversation_id,Conversation.company_id==user.company_id))
+    if not conversation: raise HTTPException(404,"conversation not found")
+    channel=session.scalar(select(Channel).where(Channel.company_id==user.company_id,Channel.kind==conversation.channel,Channel.active.is_(True)))
+    if not channel: raise HTTPException(409,"active channel not configured")
+    message,event,created=queue_outbound_message(session,conversation=conversation,channel=channel,author_name=user.name,body=payload.body,idempotency_key=payload.idempotency_key)
+    audit(session,user,"queue_outbound","conversation",conversation.id,{"outbox_event_id":event.id,"created":created}); session.commit()
+    return {"message_id":message.id,"outbox_event_id":event.id,"status":event.status,"created":created}
 
 @app.post("/api/v1/roles", status_code=201)
 def create_role(payload: RoleIn, user: User=Depends(require("organization.manage")), session: Session=Depends(db)):

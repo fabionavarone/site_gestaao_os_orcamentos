@@ -38,11 +38,15 @@ Documento base:
 - Decisao de arquitetura do corte: `docs/adr/001-stdlib-mvp.md`.
 - OS possuem transicoes persistidas e versionadas na API modular; conversas Web
   e mensagens compartilham a mesma auditoria.
+- O núcleo de canais normaliza a persistência de eventos externos e mensagens:
+  `channels`, identidades externas, eventos deduplicados e outbox existem na
+  revisão `7a91bc4de220`. O worker aplica retry com backoff e dead-letter.
 
 ## Proximo passo recomendado
 
-Proximo incremento recomendado: implementar os modulos de identidade,
-organizacao e conversas sobre o schema migrado.
+Proximo incremento recomendado: implementar o gateway Telegram real como
+adaptador do serviço canônico, incluindo criptografia de token, validação de
+webhook, download de mídia e envio pelo outbox.
 Em paralelo, validar pendencias de negocio:
 
 - categorias de equipamento do MVP;

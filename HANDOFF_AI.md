@@ -62,9 +62,15 @@ Prioridade para a proxima IA:
 
 ## Atualizacao 2026-07-22
 
-As revisoes Alembic, importacao SQLite, organizacao/RBAC, API de OS e caixa Web
-estao em commits posteriores ao baseline. A proxima fase e normalizar canais,
-outbox e gateway Telegram real configuravel.
+As revisões Alembic, importação SQLite, organização/RBAC, API de OS, caixa Web
+e núcleo omnichannel estão em commits posteriores ao baseline. A revisão
+`7a91bc4de220` introduz canais, identidades externas, eventos idempotentes e
+outbox com retry/dead-letter. O serviço em
+`apps/api/provisao_api/services/conversations.py` é a única fronteira de
+persistência que Telegram e Web devem compartilhar.
+
+Próximo incremento: gateway Telegram configurável e real, adaptado a esse
+serviço. Não criar acesso do bot ao banco nem enviar diretamente da request.
 
 ## Ultimos logs da API
 
