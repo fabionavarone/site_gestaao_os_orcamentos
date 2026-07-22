@@ -156,3 +156,5 @@ alteração local foi perdida.
   commit separado na sequência.
 - Commit documental `74f8c5c`. Push para `origin/main` tentado e não realizado
   por falha de resolução DNS de `github.com`; commits locais preservados.
+- Auditoria final acrescentou reprocessamento administrativo de dead-letter da
+  inbox e corrigiu “Assumir” para atribuir o usuário autenticado (`0e8723c`).

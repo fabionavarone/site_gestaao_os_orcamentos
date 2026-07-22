@@ -110,7 +110,11 @@ opcional de polling. A árvore deve ficar limpa após o commit documental final.
 
 Commit documental: `74f8c5c docs: document Telegram vertical operations`.
 O push final foi tentado e falhou apenas por resolução DNS de `github.com`; os
-seis commits à frente de `origin/main` permanecem preservados localmente.
+commits à frente de `origin/main` permanecem preservados localmente.
+
+Após a auditoria, `0e8723c` adicionou a tela/API de dead-letter da inbox e
+corrigiu atribuição ao assumir conversa. Backend (13) e frontend (3) passaram
+novamente; o branch permanece à frente de `origin/main`.
 
 ## Ultimos logs da API
 
