@@ -129,3 +129,28 @@ serviço canônico, com token criptografado, webhook validado e contrato local f
 Commit local criado: `8e2b0fb feat: add canonical omnichannel outbox`.
 O push para `origin/main` falhou por resolução DNS de `github.com`; nenhuma
 alteração local foi perdida.
+
+## 2026-07-22 - Entrega vertical Telegram, uploads, Inbox React e outbox
+
+- Criada a migração reversível `9c30f4a612ef` para completar canais, múltiplos
+  bots, identidades, conversas, mensagens, eventos, locks e anexos privados.
+- Tokens e segredo de webhook usam Fernet/MultiFernet; APIs retornam somente
+  fingerprint mascarada e auditam administração sem credenciais.
+- Implementados cliente Telegram real, webhook rápido e autenticado, polling de
+  desenvolvimento, normalização de texto/imagem/voz/áudio/documento/vídeo,
+  download limitado e storage local por assinatura e SHA-256.
+- Inbox/outbox compartilham serviço canônico. Workers separados processam mídia,
+  polling e entrega com lock expirável, jitter, `retry_after`, dead-letter e
+  restauração transacional em falha.
+- Criado frontend React/Vite/TypeScript/Tailwind/TanStack Query/React Hook Form:
+  login, inbox, conversa, notas, upload, bots e entregas/dead-letter.
+- Compose agora aplica migração antes da API/workers e inclui frontend, storage,
+  healthchecks e Nginx. Builds Docker de API/frontend aprovados.
+- Testes aprovados: backend modular (13), legado (3), frontend (3), compilação
+  Python, TypeScript/Vite, Alembic upgrade/downgrade/upgrade e npm audit com zero
+  vulnerabilidades. PostgreSQL confirmou revisão `9c30f4a612ef` e três tabelas
+  centrais; smoke interno Nginx respondeu health e HTML React.
+- Limitação externa: runtime Docker gerenciado não publicou porta no host; smoke
+  equivalente foi executado dentro do Nginx. Não há token/domínio autorizado.
+- Commits técnicos: `eb71aa6`, `280e928` e `7385902`; documentação registrada em
+  commit separado na sequência.

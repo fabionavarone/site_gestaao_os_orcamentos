@@ -22,7 +22,7 @@ nova fundacao modular FastAPI/PostgreSQL/Redis/Compose esta em `apps/api/` e
 
 ## Fase atual
 
-Dominio, organizacao e canais sobre a base migrada.
+Entrega vertical Telegram, uploads, Inbox React e outbox concluída no código.
 
 Consulte `docs/operations/LOCAL_RUNBOOK.md` para iniciar e testar o sistema.
 
@@ -36,11 +36,15 @@ Implementado neste corte:
 - testes automatizados sem dependencias externas.
 - API modular para OS com transicoes persistidas, bloqueio otimista e timeline;
 - API de conversas Web com mensagens internas e externas auditadas.
-- núcleo omnichannel persistente: canais, identidades externas, eventos
-  deduplicados, inbox, atribuição humana e outbox com retry/dead-letter.
+- múltiplos bots Telegram com token cifrado, webhook, polling de desenvolvimento,
+  texto e mídia por cliente Bot API real;
+- storage privado com MIME real, hash, escrita atômica e download autorizado;
+- Inbox React responsiva para conversa, notas, anexos, bots e dead-letter;
+- workers de inbox/outbox com locks, retry, backoff, rate limit e auditoria;
+- Compose com migração, PostgreSQL, Redis, API, workers, frontend e Nginx.
 
-O próximo incremento é o gateway Telegram real configurável, que consumirá o
-núcleo omnichannel já persistente. Uploads e anexos continuam pendentes.
+Ativação externa depende apenas de token autorizado e domínio/TLS. Consulte
+`docs/operations/TELEGRAM_AND_INBOX.md`.
 
 ## Regras
 

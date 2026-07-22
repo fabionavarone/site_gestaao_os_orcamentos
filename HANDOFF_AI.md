@@ -76,6 +76,38 @@ serviço. Não criar acesso do bot ao banco nem enviar diretamente da request.
 O push para `origin/main` foi tentado e permaneceu pendente por falha de DNS
 para `github.com`; o commit local está preservado e a árvore estava limpa.
 
+## Entrega vertical 1 - estado de 2026-07-22
+
+A cadeia Telegram → evento → conversa/anexo → Inbox React → resposta → outbox →
+Telegram foi implementada. Migração atual: `9c30f4a612ef`. Serviços principais:
+`services/telegram.py`, `inbox_worker.py`, `delivery.py`, `storage.py` e
+`crypto.py`. Interface: `frontend-web/`. Operação:
+`docs/operations/TELEGRAM_AND_INBOX.md`.
+
+Evidências antes do commit: 13 testes backend, 3 legados e 3 frontend aprovados;
+build Vite e imagens Docker aprovados; npm audit zerado; ciclo Alembic reversível
+aprovado; Compose/PostgreSQL/Redis/API/workers/frontend/Nginx saudáveis; smoke
+interno respondeu `/api/v1/health` e o HTML React. A porta externa não foi
+publicada pelo runtime gerenciado, embora a configuração Docker tenha o binding.
+
+Próximo comando exato após checkout/configuração de ambiente:
+
+```bash
+ENV_FILE=.env POSTGRES_PASSWORD='<valor-do-ambiente>' docker compose up -d
+```
+
+Para homologação externa, cadastrar token pela tela Bots, configurar
+`PUBLIC_BASE_URL` HTTPS e ativar webhook. Nenhum segredo foi versionado.
+
+Commits da entrega:
+
+- `eb71aa6 feat: deliver secure Telegram messaging vertical`;
+- `280e928 feat: add React inbox and Telegram operations UI`;
+- `7385902 ops: run vertical stack with healthchecks`.
+
+Serviços foram deixados ativos e saudáveis no Compose local, exceto o profile
+opcional de polling. A árvore deve ficar limpa após o commit documental final.
+
 ## Ultimos logs da API
 
 Logs da API nao encontrados ou servico api nao existe.

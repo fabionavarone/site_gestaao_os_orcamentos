@@ -41,12 +41,15 @@ Documento base:
 - O núcleo de canais normaliza a persistência de eventos externos e mensagens:
   `channels`, identidades externas, eventos deduplicados e outbox existem na
   revisão `7a91bc4de220`. O worker aplica retry com backoff e dead-letter.
+- A revisão `9c30f4a612ef` completa bots, identidades, estados de conversa e
+  mensagem, locks, anexos e métricas. Telegram real usa webhook ou polling sobre
+  os mesmos eventos. O frontend operacional está em `frontend-web/`.
 
 ## Proximo passo recomendado
 
-Proximo incremento recomendado: implementar o gateway Telegram real como
-adaptador do serviço canônico, incluindo criptografia de token, validação de
-webhook, download de mídia e envio pelo outbox.
+Próximo incremento recomendado: homologar a cadeia Telegram com token e domínio
+autorizados e, sem bloquear isso, iniciar o workflow persistente previsto no
+blueprint.
 Em paralelo, validar pendencias de negocio:
 
 - categorias de equipamento do MVP;
