@@ -83,3 +83,23 @@ Em paralelo, validar pendencias de negocio:
 - filas iniciais;
 - catalogo inicial de intencoes com exemplos reais;
 - quais fluxos podem criar OS e quais criam apenas rascunho.
+
+## Registros técnicos locais - 2026-07-22
+
+Foi integrado `technical_api.py` e criada a migração candidata
+`g3d4e5f6a702` para diagnósticos versionados, medições, testes técnicos e
+checklists. O backend e a interface React de OS já expõem criação, revisão,
+aprovação, aplicação e validação de checklist. A unidade foi validada com 24
+testes backend, 5 frontend, build TypeScript/Vite, compileall e ciclo Alembic.
+Conclusão técnica, atendimento especializado, entrega, garantia e retorno ainda
+devem ser implementados.
+
+## Estado para retomada em nova seção - 2026-07-22
+
+O último commit publicado é `202095f`. A próxima unidade começou localmente
+com os modelos de diagnóstico, medições, testes técnicos e checklists em
+`apps/api/provisao_api/models.py` e a migração candidata
+`migrations/versions/g3d4e5f6a702_technical_records_and_checklists.py`.
+`compileall` e o ciclo Alembic upgrade/downgrade/upgrade em SQLite temporário
+passaram. Ainda faltam serviço, API, autorização, auditoria, testes e React;
+retomar por esses itens sem recriar os módulos publicados.

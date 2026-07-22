@@ -62,6 +62,16 @@ Operação do CRM: APIs em `/api/v1/crm` e tela Clientes no painel Web.
 Handoff da seção atual: `HANDOFF_AI.md` registra o estado exato da Entrega
 Vertical 2 e a retomada do incremento de OS.
 
+O incremento técnico local adiciona diagnóstico versionado, medições, testes
+técnicos e checklists com API tenant-scoped e ações reais na tela de OS; a
+conclusão técnica, entrega e garantia permanecem como próxima unidade.
+
+Para encerrar esta seção e retomá-la em outra sessão, leia primeiro
+`README.md`, `PROJECT_CONTEXT.md`, `DEVELOPMENT_LOG.md` e `HANDOFF_AI.md`.
+O último commit publicado é `202095f`; há uma migração/modelos locais ainda
+não publicados para diagnósticos, medições, testes técnicos e checklists. O
+handoff contém o comando exato, evidências e a ordem segura de continuação.
+
 ## Regras
 
 - Trabalhar somente dentro deste diretorio.

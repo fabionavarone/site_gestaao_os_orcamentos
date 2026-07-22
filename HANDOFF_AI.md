@@ -241,3 +241,82 @@ numeração transacional, workflow, SLA inicial, recepção/triagem, tarefas,
 timeline interna/pública e detalhe React. Testes modulares: 21 aprovados; os
 3 legados e 5 frontend permanecem aprovados. Próximo incremento: diagnóstico,
 medições, testes técnicos, checklists e conclusão.
+
+## Handoff para nova seção - 2026-07-22
+
+### Estado verificável
+
+Branch `main` está em `202095f docs: record service order operations increment`,
+alinhada com `origin/main` no último estado publicado. A árvore local contém
+uma alteração deliberadamente iniciada, ainda não commitada, para o próximo
+incremento:
+
+- `apps/api/provisao_api/models.py`: modelos `ServiceOrderDiagnosis`,
+  `ServiceOrderMeasurement`, `ServiceOrderTechnicalTest`, `ChecklistTemplate`
+  e `ServiceOrderChecklist`.
+- `migrations/versions/g3d4e5f6a702_technical_records_and_checklists.py`:
+  migração candidata, descendente de `f2c3d4e5a601`.
+
+Não há API, testes ou interface publicados para esses modelos. A migração foi
+validada localmente em SQLite temporário no ciclo upgrade → downgrade para
+`f2c3d4e5a601` → upgrade, e `compileall` passou. Isso valida apenas o schema;
+não declarar o incremento concluído.
+
+### Evidências publicadas acumuladas
+
+- Workflow persistente/versionado, editor e execução: `17865b8`, `8cd4676`,
+  `a9d9488`, `8fc01e4`.
+- CRM completo inicial: `411a2d9`, `3d06aad`, `4d9e760`.
+- Catálogos/equipamentos: `20e1b8f`.
+- OS, recepção, triagem, tarefas, SLA inicial e timeline: `d160958`, `202095f`.
+- Regressões anteriormente aprovadas: backend modular 21, legado 3,
+  frontend 5; build Vite/TypeScript, compileall e ciclos Alembic.
+
+### Próximo comando exato
+
+```bash
+cd /opt/provisao/site_gestaao_os_orcamentos
+git status --short --branch
+PYTHONPATH=apps/api .venv/bin/python -m unittest discover -s apps/api/tests -v
+```
+
+### Sequência obrigatória de retomada
+
+1. Criar `technical_api.py` tenant-scoped e incluí-lo em `main.py` para
+   diagnósticos versionados, medições, testes técnicos, templates/checklists e
+   auditoria/timeline.
+2. Criar testes backend de draft → revisão → aprovação imutável, nova versão,
+   medições, testes, checklist obrigatório e isolamento por organização.
+3. Integrar formulários reais na tela React de OS; nenhum botão pode ser apenas
+   visual.
+4. Implementar conclusão técnica, tarefas obrigatórias, SLA operacional,
+   bancada/remoto/campo, visitas, entrega, garantia e retorno.
+5. Emitir notificações públicas pela outbox Telegram existente; eventos
+   internos permanecem internos.
+6. Executar regressões, frontend, build, Compose/smoke e auditoria; atualizar
+   os quatro documentos, fazer commits pequenos e publicar quando possível.
+
+### Limitações externas conhecidas
+
+Token Telegram real e domínio/TLS não estão disponíveis; a implementação deve
+continuar com Telegram fake e configuração desativada. Push pode depender de
+DNS/rede do ambiente. Nenhuma dessas limitações impede o desenvolvimento local.
+
+### Persistência do handoff
+
+As alterações desta documentação e o schema inicial estão no working tree. O
+commit não pôde ser criado nesta execução porque `.git/index` está montado como
+somente leitura (`Unable to create .git/index.lock`). Preserve os arquivos e
+crie o commit assim que o índice estiver gravável; não use `reset` ou `clean`.
+
+## Atualização técnica posterior - 2026-07-22
+
+`technical_api.py` foi integrado ao FastAPI. A revisão candidata `g3d4e5f6a702`
+passou o ciclo de migração e há testes para diagnóstico draft/revisão/aprovação,
+nova versão, medições, testes e checklist obrigatório. Backend passou 24 testes;
+frontend passou 5 testes e build Vite/TypeScript.
+
+A tela de OS possui ações reais para criar e revisar diagnóstico, registrar
+medição/teste e aplicar checklist publicado. Ainda faltam conclusão técnica,
+bancada/remoto/campo, agenda, entrega, garantia, retorno, notificações públicas
+e E2E completo. Faça o commit assim que `.git/index` estiver gravável.

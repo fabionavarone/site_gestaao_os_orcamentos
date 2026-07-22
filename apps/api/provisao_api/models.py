@@ -460,6 +460,28 @@ class ServiceOrderTriage(Base):
     performed_by: Mapped[str] = mapped_column(ForeignKey("users.id")); physical_condition: Mapped[str | None] = mapped_column(Text); visual_signs: Mapped[str | None] = mapped_column(Text)
     powers_on: Mapped[bool | None]; accessories: Mapped[dict] = mapped_column(JSON, default=dict); electrical_risk: Mapped[bool] = mapped_column(Boolean, default=False); mechanical_risk: Mapped[bool] = mapped_column(Boolean, default=False); suggested_priority: Mapped[str | None] = mapped_column(String(20)); observations: Mapped[str | None] = mapped_column(Text); checklist: Mapped[dict] = mapped_column(JSON, default=dict); created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())
 
+class ServiceOrderDiagnosis(Base):
+    __tablename__ = "service_order_diagnoses"
+    id: Mapped[str] = mapped_column(String(36), primary_key=True, default=uid); company_id: Mapped[str] = mapped_column(ForeignKey("companies.id"), index=True); service_order_id: Mapped[str] = mapped_column(ForeignKey("service_orders.id", ondelete="CASCADE"), index=True); version: Mapped[int] = mapped_column(Integer); summary: Mapped[str] = mapped_column(Text); details: Mapped[str | None] = mapped_column(Text); risk: Mapped[str | None] = mapped_column(String(40)); repairable: Mapped[bool | None]; recommendation: Mapped[str | None] = mapped_column(Text); status: Mapped[str] = mapped_column(String(20), default="draft", index=True); technician_id: Mapped[str] = mapped_column(ForeignKey("users.id")); reviewer_id: Mapped[str | None] = mapped_column(ForeignKey("users.id")); reviewed_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True)); created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())
+    __table_args__ = (UniqueConstraint("service_order_id", "version"), CheckConstraint("status IN ('draft','under_review','approved','rejected','superseded')", name="diagnosis_status"))
+
+class ServiceOrderMeasurement(Base):
+    __tablename__ = "service_order_measurements"
+    id: Mapped[str] = mapped_column(String(36), primary_key=True, default=uid); company_id: Mapped[str] = mapped_column(ForeignKey("companies.id"), index=True); service_order_id: Mapped[str] = mapped_column(ForeignKey("service_orders.id", ondelete="CASCADE"), index=True); parameter: Mapped[str] = mapped_column(String(120)); value: Mapped[str] = mapped_column(String(120)); unit: Mapped[str | None] = mapped_column(String(40)); instrument: Mapped[str | None] = mapped_column(String(120)); condition: Mapped[str | None] = mapped_column(String(200)); result: Mapped[str | None] = mapped_column(String(40)); performed_by: Mapped[str] = mapped_column(ForeignKey("users.id")); created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())
+
+class ServiceOrderTechnicalTest(Base):
+    __tablename__ = "service_order_technical_tests"
+    id: Mapped[str] = mapped_column(String(36), primary_key=True, default=uid); company_id: Mapped[str] = mapped_column(ForeignKey("companies.id"), index=True); service_order_id: Mapped[str] = mapped_column(ForeignKey("service_orders.id", ondelete="CASCADE"), index=True); name: Mapped[str] = mapped_column(String(160)); procedure: Mapped[str | None] = mapped_column(Text); result: Mapped[str | None] = mapped_column(Text); status: Mapped[str] = mapped_column(String(20), default="inconclusive"); observation: Mapped[str | None] = mapped_column(Text); performed_by: Mapped[str] = mapped_column(ForeignKey("users.id")); created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now());
+    __table_args__ = (CheckConstraint("status IN ('passed','failed','inconclusive')", name="technical_test_status"),)
+
+class ChecklistTemplate(Base):
+    __tablename__ = "checklist_templates"
+    id: Mapped[str] = mapped_column(String(36), primary_key=True, default=uid); company_id: Mapped[str] = mapped_column(ForeignKey("companies.id"), index=True); name: Mapped[str] = mapped_column(String(160)); purpose: Mapped[str | None] = mapped_column(String(120)); status: Mapped[str] = mapped_column(String(20), default="draft"); version: Mapped[int] = mapped_column(Integer, default=1); items: Mapped[list] = mapped_column(JSON, default=list); created_by: Mapped[str] = mapped_column(ForeignKey("users.id")); created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())
+
+class ServiceOrderChecklist(Base):
+    __tablename__ = "service_order_checklists"
+    id: Mapped[str] = mapped_column(String(36), primary_key=True, default=uid); company_id: Mapped[str] = mapped_column(ForeignKey("companies.id"), index=True); service_order_id: Mapped[str] = mapped_column(ForeignKey("service_orders.id", ondelete="CASCADE"), index=True); template_id: Mapped[str | None] = mapped_column(ForeignKey("checklist_templates.id")); template_version: Mapped[int] = mapped_column(Integer); items: Mapped[list] = mapped_column(JSON, default=list); status: Mapped[str] = mapped_column(String(20), default="pending"); completed_by: Mapped[str | None] = mapped_column(ForeignKey("users.id")); completed_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
+
 class AuditLog(Base):
     __tablename__ = "audit_logs"
     id: Mapped[str] = mapped_column(String(36), primary_key=True, default=uid)

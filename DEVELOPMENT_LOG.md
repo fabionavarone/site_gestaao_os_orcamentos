@@ -245,3 +245,31 @@ alteração local foi perdida.
 - Testes aprovados: backend 17/17, legado 3/3, frontend 5/5, compileall, build
   TypeScript/Vite e Alembic upgrade/downgrade/upgrade.
 - Commits: `17865b8`, `8cd4676` e `a9d9488`.
+
+## 2026-07-22 - Handoff técnico para próxima seção
+
+- OS/recepção/triagem/tarefas/timeline foram publicados em `d160958` e
+  documentados em `202095f`; a regressão modular permanece em 21 testes.
+- Foi iniciado o próximo incremento com cinco modelos persistentes para
+  diagnóstico versionado, medições, testes técnicos e checklists, além da
+  migração `g3d4e5f6a702`.
+- A migração candidata passou upgrade → downgrade → upgrade em SQLite
+  temporário e `compileall` passou. Nenhum endpoint ou tela desses registros
+  foi criado ainda; a entrega não está concluída.
+- Próxima retomada: implementar `technical_api.py`, testes de ciclo de
+  diagnóstico/checklist e formulários reais na tela de OS, depois concluir
+  assistência técnica, notificações públicas, regressões e operação Docker.
+
+## 2026-07-22 - Registros técnicos de OS
+
+- Integrada a API `technical_api.py` e a migração candidata `g3d4e5f6a702` para
+  diagnóstico versionado, medições, testes técnicos e checklists.
+- Diagnósticos passam por draft, revisão e aprovação imutável; correções criam
+  nova versão. Templates publicados são imutáveis e checklists obrigatórios
+  validam conclusão. Auditoria e timeline são registradas.
+- A tela React de OS possui ações reais para criar/revisar/aprovar diagnóstico,
+  registrar medição/teste e aplicar checklist publicado.
+- Evidências: backend 24/24, frontend 5/5, build Vite/TypeScript,
+  compileall e ciclo Alembic upgrade → downgrade → upgrade aprovados.
+- Próximo incremento: conclusão técnica, bancada/remoto/campo, agenda, entrega,
+  garantia, retorno, notificações Telegram e E2E completo.
