@@ -34,6 +34,8 @@ Implementado neste corte:
 - caixa de entrada Web, mensagens externas e notas internas;
 - fronteira canonica e idempotente para updates Telegram;
 - testes automatizados sem dependencias externas.
+- API modular para OS com transicoes persistidas, bloqueio otimista e timeline;
+- API de conversas Web com mensagens internas e externas auditadas.
 
 Ainda requer evolucao antes de producao: upload e arquivos,
 Telegram real com segredos, IA local, documentos, estoque, financeiro, portais,

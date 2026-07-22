@@ -36,6 +36,8 @@ Documento base:
 - Documentacao de produto: `docs/product/MASTER_BLUEPRINT.md`.
 - Execucao e limites: `docs/operations/LOCAL_RUNBOOK.md`.
 - Decisao de arquitetura do corte: `docs/adr/001-stdlib-mvp.md`.
+- OS possuem transicoes persistidas e versionadas na API modular; conversas Web
+  e mensagens compartilham a mesma auditoria.
 
 ## Proximo passo recomendado
 

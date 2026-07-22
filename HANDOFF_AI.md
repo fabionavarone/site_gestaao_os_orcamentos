@@ -60,6 +60,12 @@ Prioridade para a proxima IA:
 6. Nunca tratar o endpoint demonstrativo Telegram como webhook de producao sem
    autenticacao do gateway, criptografia de segredos e rate limiting.
 
+## Atualizacao 2026-07-22
+
+As revisoes Alembic, importacao SQLite, organizacao/RBAC, API de OS e caixa Web
+estao em commits posteriores ao baseline. A proxima fase e normalizar canais,
+outbox e gateway Telegram real configuravel.
+
 ## Ultimos logs da API
 
 Logs da API nao encontrados ou servico api nao existe.

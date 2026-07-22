@@ -100,3 +100,10 @@ Proximo passo recomendado:
 - Criadas rotas protegidas para cadastro de papeis, unidades, equipes e
   usuarios; permissoes e negacoes sao verificadas e auditadas no backend.
 - Validado ciclo completo de upgrade/downgrade/upgrade das duas revisoes.
+
+## 2026-07-22 - OS e caixa Web
+
+- Criadas APIs tenant-scoped para criar OS, executar transicoes validas com
+  optimistic locking e registrar historico imutavel de eventos.
+- Criadas APIs para conversas e mensagens Web, separando nota interna de
+  mensagem externa e auditando ambas.
