@@ -34,6 +34,9 @@ class CrmApiTest(unittest.TestCase):
         address = self.endpoint("/api/v1/crm/customers/{customer_id}/addresses", "POST")(customer["id"], AddressPayload(street="Rua A", city="São Paulo", state="SP"), self.user, self.db)
         self.assertEqual(contact["name"], "Contato"); self.assertEqual(address["city"], "São Paulo")
         get = self.endpoint("/api/v1/crm/customers/{customer_id}", "GET"); self.assertEqual(len(get(customer["id"], self.user, self.db)["contacts"]), 1)
+        updated_contact = self.endpoint("/api/v1/crm/customers/{customer_id}/contacts/{contact_id}", "PATCH")(customer["id"], contact["id"], ContactPayload(name="Contato atualizado", email="novo@example.com"), self.user, self.db)
+        updated_address = self.endpoint("/api/v1/crm/customers/{customer_id}/addresses/{address_id}", "PATCH")(customer["id"], address["id"], AddressPayload(street="Rua B", city="Campinas", state="SP"), self.user, self.db)
+        self.assertEqual(updated_contact["name"], "Contato atualizado"); self.assertEqual(updated_address["street"], "Rua B")
         with self.assertRaises(Exception): get(customer["id"], self.other_user, self.db)
 
 if __name__ == "__main__": unittest.main()

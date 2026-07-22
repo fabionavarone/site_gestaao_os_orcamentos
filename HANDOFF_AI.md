@@ -339,6 +339,9 @@ de SLA; o cálculo trata timestamps ingênuos e timezone-aware.
 Tarefas possuem dependência persistida (`i5f6a7b8c904`) e a criação rejeita
 referências fora da OS.
 
+Contatos e endereços CRM também possuem atualização tenant-scoped real e testes
+de regressão.
+
 ## Atualização de atendimento e garantia - 2026-07-22
 
 Foi iniciado o incremento seguinte com `completion_api.py` e a migração

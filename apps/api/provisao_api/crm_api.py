@@ -115,6 +115,19 @@ def build_router(current_user: Callable, require: Callable, audit: Callable) -> 
     @router.post("/customers/{customer_id}/addresses", status_code=201)
     def create_address(customer_id: str, payload: AddressPayload, user: User = Depends(require("crm.update")), session: Session = Depends(db)):
         customer = owned(session, user, customer_id); item = CustomerAddress(company_id=user.company_id, customer_id=customer.id, **payload.model_dump()); session.add(item); session.flush(); audit(session, user, "crm_address_created", "customer_address", item.id); session.commit(); return address_view(item)
+    @router.patch("/customers/{customer_id}/contacts/{contact_id}")
+    def update_contact(customer_id: str, contact_id: str, payload: ContactPayload, user: User = Depends(require("crm.update")), session: Session = Depends(db)):
+        customer = owned(session, user, customer_id); item = session.scalar(select(CustomerContact).where(CustomerContact.id == contact_id, CustomerContact.customer_id == customer.id, CustomerContact.company_id == user.company_id))
+        if not item: raise HTTPException(404, "contact not found")
+        data = payload.model_dump(); item.normalized_email = email(str(payload.email) if payload.email else None); item.normalized_phone = digits(payload.phone)
+        for key, value in data.items(): setattr(item, key, value)
+        audit(session, user, "crm_contact_updated", "customer_contact", item.id); session.commit(); return contact_view(item)
+    @router.patch("/customers/{customer_id}/addresses/{address_id}")
+    def update_address(customer_id: str, address_id: str, payload: AddressPayload, user: User = Depends(require("crm.update")), session: Session = Depends(db)):
+        customer = owned(session, user, customer_id); item = session.scalar(select(CustomerAddress).where(CustomerAddress.id == address_id, CustomerAddress.customer_id == customer.id, CustomerAddress.company_id == user.company_id))
+        if not item: raise HTTPException(404, "address not found")
+        for key, value in payload.model_dump().items(): setattr(item, key, value)
+        audit(session, user, "crm_address_updated", "customer_address", item.id); session.commit(); return address_view(item)
     return router
 
 def contact_view(item: CustomerContact) -> dict:

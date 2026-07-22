@@ -300,3 +300,5 @@ alteração local foi perdida.
   de SLA com ajuste determinístico do vencimento; regressão backend 28/28.
 - Tarefas agora aceitam dependência na mesma OS, com FK/index e validação de
   escopo; ciclo Alembic `i5f6a7b8c904` reversível foi aprovado.
+- CRM ganhou edição tenant-scoped de contatos e endereços, com testes de
+  atualização e isolamento preservados.

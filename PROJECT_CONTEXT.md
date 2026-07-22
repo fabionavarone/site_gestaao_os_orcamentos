@@ -115,6 +115,9 @@ backend com escopo por organização e ajuste do vencimento.
 
 Dependências de tarefas também estão persistidas e tenant-scoped.
 
+CRM possui criação, consulta e atualização de clientes, contatos e endereços
+com isolamento por organização.
+
 ## Estado para retomada em nova seção - 2026-07-22
 
 O último commit publicado é `202095f`. A próxima unidade começou localmente
