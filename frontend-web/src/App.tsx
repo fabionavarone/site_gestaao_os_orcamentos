@@ -5,6 +5,7 @@ import { z } from 'zod';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { api, login, User } from './api';
 import { Bot, Conversation, ConversationOptions, Detail, InboxEvent, Outbox, SelectOption } from './types';
+import Workflows from './Workflows';
 
 const loginSchema = z.object({
   email: z.string().email('E-mail inválido'),
@@ -186,9 +187,9 @@ function Deliveries() {
 }
 
 export default function App() {
-  const [user, setUser] = useState<User>(); const [checking, setChecking] = useState(true); const [tab, setTab] = useState<'inbox' | 'bots' | 'deliveries'>('inbox');
+  const [user, setUser] = useState<User>(); const [checking, setChecking] = useState(true); const [tab, setTab] = useState<'inbox' | 'bots' | 'deliveries' | 'workflows'>('inbox');
   useEffect(() => { api<{ user: User }>('/auth/me').then(result => setUser(result.user)).catch(() => {}).finally(() => setChecking(false)); }, []);
   if (checking) return <main className="grid min-h-screen place-items-center">Carregando…</main>;
   if (!user) return <Login onLogin={setUser} />;
-  return <div className="min-h-screen"><header className="border-b bg-white"><div className="mx-auto flex max-w-7xl flex-wrap items-center justify-between gap-3 p-4"><div><strong>Provisão Manager</strong><span className="ml-2 muted">{user.name}</span></div><nav aria-label="Principal" className="flex gap-2"><button onClick={() => setTab('inbox')}>Inbox</button><button onClick={() => setTab('bots')}>Bots</button><button onClick={() => setTab('deliveries')}>Entregas</button><button className="bg-slate-600" onClick={async () => { await api('/auth/logout', { method: 'POST' }); setUser(undefined); }}>Sair</button></nav></div></header><main className="mx-auto max-w-7xl p-4">{tab === 'inbox' ? <Inbox /> : tab === 'bots' ? <Bots /> : <Deliveries />}</main></div>;
+  return <div className="min-h-screen"><header className="border-b bg-white"><div className="mx-auto flex max-w-7xl flex-wrap items-center justify-between gap-3 p-4"><div><strong>Provisão Manager</strong><span className="ml-2 muted">{user.name}</span></div><nav aria-label="Principal" className="flex flex-wrap gap-2"><button onClick={() => setTab('inbox')}>Inbox</button><button onClick={() => setTab('bots')}>Bots</button><button onClick={() => setTab('deliveries')}>Entregas</button><button onClick={() => setTab('workflows')}>Workflows</button><button className="bg-slate-600" onClick={async () => { await api('/auth/logout', { method: 'POST' }); setUser(undefined); }}>Sair</button></nav></div></header><main className="mx-auto max-w-7xl p-4">{tab === 'inbox' ? <Inbox /> : tab === 'bots' ? <Bots /> : tab === 'deliveries' ? <Deliveries /> : <Workflows />}</main></div>;
 }
