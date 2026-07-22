@@ -72,6 +72,12 @@ Itens definitivos aparecem na tela Entregas e podem ser reprocessados por usuár
 com `telegram.manage`. Rate limit respeita `retry_after`; locks interrompidos são
 recuperados após `OUTBOX_LOCK_SECONDS`.
 
+Na Inbox, filtros de canal, bot, estado, equipe, responsável e prioridade usam
+as rotas reais. A conversa permite assumir/transferir, retornar à fila, marcar
+esperas, resolver/fechar, pausar automação e vincular cliente, equipamento e OS.
+Os seletores são carregados por `/api/v1/conversation-options` e retornam somente
+registros da empresa autenticada.
+
 ## Backup e restauração do storage
 
 Pare os workers ou garanta snapshot consistente, copie o volume `uploads_data`

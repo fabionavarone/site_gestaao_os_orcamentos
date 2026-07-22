@@ -158,3 +158,21 @@ alteração local foi perdida.
   por falha de resolução DNS de `github.com`; commits locais preservados.
 - Auditoria final acrescentou reprocessamento administrativo de dead-letter da
   inbox e corrigiu “Assumir” para atribuir o usuário autenticado (`0e8723c`).
+
+## 2026-07-22 - Fechamento operacional da Entrega Vertical 1
+
+- A Inbox React passou a expor todos os filtros do backend, paginação e ações
+  reais de assumir, transferir, devolver à fila, aguardar cliente/equipe,
+  resolver, fechar/reabrir e pausar/retomar automação.
+- Adicionado lookup tenant-scoped para seletores de atendente, equipe, cliente,
+  equipamento e OS; vínculos deixam de exigir digitação manual de UUID.
+- A tela de bots agora altera modo com o bot inativo, configura/remove webhook e
+  consulta saúde e métricas. O token permanece somente mascarado.
+- Testes finais aprovados: backend modular 13/13, legado 3/3, frontend 4/4,
+  compileall, TypeScript/Vite e ciclo Alembic upgrade/downgrade/upgrade.
+- Imagens Docker de API/frontend reconstruídas; PostgreSQL, Redis, API,
+  inbox-worker, outbox-worker, frontend e Nginx ativos. Smoke interno retornou
+  health da API, HTML React e revisão PostgreSQL `9c30f4a612ef`.
+- `npm audit` havia registrado zero vulnerabilidades na validação anterior; a
+  repetição final foi impedida exclusivamente pelo DNS do registry.
+- Commit funcional: `8be9f5d feat: complete inbox operational controls`.

@@ -116,6 +116,15 @@ Após a auditoria, `0e8723c` adicionou a tela/API de dead-letter da inbox e
 corrigiu atribuição ao assumir conversa. Backend (13) e frontend (3) passaram
 novamente; o branch permanece à frente de `origin/main`.
 
+Fechamento adicional em `8be9f5d`: a Inbox agora possui filtros completos,
+paginação, transferências, fila/esperas, pausa da automação e vínculos por
+seletores tenant-scoped. A tela Bots cobre mudança de modo, configuração e
+remoção de webhook, saúde e métricas. Evidências finais: backend modular 13/13,
+legado 3/3, frontend 4/4, Vite/TypeScript, compileall e Alembic reversível. O
+stack reconstruído está ativo; smoke interno confirmou API, frontend e revisão
+PostgreSQL `9c30f4a612ef`. A única ativação não executada é externa e exige token
+Telegram e domínio/TLS autorizados. O push segue dependente de DNS para GitHub.
+
 ## Ultimos logs da API
 
 Logs da API nao encontrados ou servico api nao existe.

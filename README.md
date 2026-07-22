@@ -39,7 +39,9 @@ Implementado neste corte:
 - múltiplos bots Telegram com token cifrado, webhook, polling de desenvolvimento,
   texto e mídia por cliente Bot API real;
 - storage privado com MIME real, hash, escrita atômica e download autorizado;
-- Inbox React responsiva para conversa, notas, anexos, bots e dead-letter;
+- Inbox React responsiva para conversa, filtros/paginação, atribuição,
+  transferência, esperas, vínculos com cliente/equipamento/OS, pausa da
+  automação, notas, anexos, bots, saúde/métricas e dead-letter;
 - workers de inbox/outbox com locks, retry, backoff, rate limit e auditoria;
 - Compose com migração, PostgreSQL, Redis, API, workers, frontend e Nginx.
 

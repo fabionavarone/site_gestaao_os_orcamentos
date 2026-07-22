@@ -44,12 +44,17 @@ Documento base:
 - A revisão `9c30f4a612ef` completa bots, identidades, estados de conversa e
   mensagem, locks, anexos e métricas. Telegram real usa webhook ou polling sobre
   os mesmos eventos. O frontend operacional está em `frontend-web/`.
+- A Inbox oferece a cadeia humana completa: filtros e paginação, assumir,
+  transferir por atendente/equipe, devolver à fila, esperas, resolver/fechar,
+  pausar automação e vincular cliente, equipamento e OS usando seletores
+  isolados pela empresa. A administração de bots expõe modo, webhook, saúde e
+  métricas sem retornar credenciais.
 
 ## Proximo passo recomendado
 
-Próximo incremento recomendado: homologar a cadeia Telegram com token e domínio
-autorizados e, sem bloquear isso, iniciar o workflow persistente previsto no
-blueprint.
+Próximo incremento recomendado: homologar externamente a cadeia Telegram quando
+token e domínio autorizados estiverem disponíveis e iniciar o workflow
+persistente previsto no blueprint. A Entrega Vertical 1 está validada localmente.
 Em paralelo, validar pendencias de negocio:
 
 - categorias de equipamento do MVP;
