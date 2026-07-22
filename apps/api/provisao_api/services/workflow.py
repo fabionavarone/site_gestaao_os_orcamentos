@@ -140,6 +140,7 @@ def ensure_default_workflow(session: Session, company_id: str, actor_id: str) ->
     for origin, destinations in DEFAULT_TRANSITIONS.items():
         for position, destination in enumerate(destinations):
             session.add(WorkflowTransition(workflow_version_id=version.id, code=f"{origin}_to_{destination}", name=f"{states[origin].name} → {states[destination].name}", from_state_id=states[origin].id, to_state_id=states[destination].id, required_permission="service_order.transition", requires_reason=destination in {"cancelled","technical_hold","customer_hold","closed"}, requires_checklist_completion=destination in {"ready_for_delivery","closed"}, requires_diagnosis=destination in {"awaiting_budget","ready_for_delivery"}, requires_customer_notification=states[destination].is_public, conditions={}, actions=[], position=position))
+    session.flush()
     publish_version(session, version, actor_id)
     return version
 

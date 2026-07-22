@@ -411,6 +411,22 @@ class ServiceOrder(Base):
     number: Mapped[int] = mapped_column(Integer)
     customer_id: Mapped[str] = mapped_column(ForeignKey("customers.id"), index=True)
     equipment_id: Mapped[str | None] = mapped_column(ForeignKey("equipment.id"))
+    contact_id: Mapped[str | None] = mapped_column(ForeignKey("customer_contacts.id"), index=True)
+    address_id: Mapped[str | None] = mapped_column(ForeignKey("customer_addresses.id"), index=True)
+    conversation_id: Mapped[str | None] = mapped_column(ForeignKey("conversations.id"), index=True)
+    channel_of_origin: Mapped[str | None] = mapped_column(String(32))
+    service_type: Mapped[str] = mapped_column(String(20), default="bench")
+    team_id: Mapped[str | None] = mapped_column(ForeignKey("teams.id"), index=True)
+    responsible_id: Mapped[str | None] = mapped_column(ForeignKey("users.id"), index=True)
+    technician_id: Mapped[str | None] = mapped_column(ForeignKey("users.id"), index=True)
+    sla_policy: Mapped[dict] = mapped_column(JSON, default=dict)
+    sla_due_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), index=True)
+    sla_paused_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
+    received_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
+    triaged_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
+    completed_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
+    internal_notes: Mapped[str | None] = mapped_column(Text)
+    public_notes: Mapped[str | None] = mapped_column(Text)
     title: Mapped[str] = mapped_column(String(240))
     symptom: Mapped[str | None] = mapped_column(Text)
     priority: Mapped[str] = mapped_column(String(20), default="normal")
@@ -425,6 +441,24 @@ class ServiceOrderSequence(Base):
     company_id: Mapped[str] = mapped_column(ForeignKey("companies.id"), primary_key=True)
     next_number: Mapped[int] = mapped_column(Integer, default=1)
     updated_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now(), onupdate=func.now())
+
+class ServiceOrderTask(Base):
+    __tablename__ = "service_order_tasks"
+    id: Mapped[str] = mapped_column(String(36), primary_key=True, default=uid)
+    company_id: Mapped[str] = mapped_column(ForeignKey("companies.id"), index=True)
+    service_order_id: Mapped[str] = mapped_column(ForeignKey("service_orders.id", ondelete="CASCADE"), index=True)
+    title: Mapped[str] = mapped_column(String(200)); description: Mapped[str | None] = mapped_column(Text)
+    assigned_to: Mapped[str | None] = mapped_column(ForeignKey("users.id"), index=True); status: Mapped[str] = mapped_column(String(20), default="pending", index=True)
+    priority: Mapped[str] = mapped_column(String(20), default="normal"); due_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True)); completed_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True)); blocked_reason: Mapped[str | None] = mapped_column(Text)
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())
+
+class ServiceOrderTriage(Base):
+    __tablename__ = "service_order_triage"
+    id: Mapped[str] = mapped_column(String(36), primary_key=True, default=uid)
+    company_id: Mapped[str] = mapped_column(ForeignKey("companies.id"), index=True)
+    service_order_id: Mapped[str] = mapped_column(ForeignKey("service_orders.id", ondelete="CASCADE"), unique=True)
+    performed_by: Mapped[str] = mapped_column(ForeignKey("users.id")); physical_condition: Mapped[str | None] = mapped_column(Text); visual_signs: Mapped[str | None] = mapped_column(Text)
+    powers_on: Mapped[bool | None]; accessories: Mapped[dict] = mapped_column(JSON, default=dict); electrical_risk: Mapped[bool] = mapped_column(Boolean, default=False); mechanical_risk: Mapped[bool] = mapped_column(Boolean, default=False); suggested_priority: Mapped[str | None] = mapped_column(String(20)); observations: Mapped[str | None] = mapped_column(Text); checklist: Mapped[dict] = mapped_column(JSON, default=dict); created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())
 
 class AuditLog(Base):
     __tablename__ = "audit_logs"
