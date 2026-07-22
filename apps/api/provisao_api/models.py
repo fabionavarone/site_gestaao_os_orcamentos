@@ -1,6 +1,6 @@
 import uuid
 from datetime import datetime
-from sqlalchemy import Boolean, DateTime, ForeignKey, Integer, JSON, String, Text, UniqueConstraint, func
+from sqlalchemy import Boolean, CheckConstraint, DateTime, ForeignKey, Integer, JSON, String, Text, UniqueConstraint, func
 from sqlalchemy.orm import Mapped, mapped_column
 from .db import Base
 
@@ -108,11 +108,21 @@ class Conversation(Base):
     id: Mapped[str] = mapped_column(String(36), primary_key=True, default=uid)
     company_id: Mapped[str] = mapped_column(ForeignKey("companies.id"), index=True)
     channel: Mapped[str] = mapped_column(String(32), index=True)
+    channel_id: Mapped[str | None] = mapped_column(ForeignKey("channels.id"), index=True)
+    bot_id: Mapped[str | None] = mapped_column(ForeignKey("channel_bots.id"), index=True)
+    external_identity_id: Mapped[str | None] = mapped_column(ForeignKey("external_identities.id"), index=True)
     subject: Mapped[str] = mapped_column(String(240))
     customer_id: Mapped[str | None] = mapped_column(ForeignKey("customers.id"), index=True)
-    status: Mapped[str] = mapped_column(String(32), default="human_queue", index=True)
+    equipment_id: Mapped[str | None] = mapped_column(ForeignKey("equipment.id"), index=True)
+    service_order_id: Mapped[str | None] = mapped_column(ForeignKey("service_orders.id"), index=True)
+    status: Mapped[str] = mapped_column(String(32), default="queued", index=True)
     assigned_to: Mapped[str | None] = mapped_column(ForeignKey("users.id"), index=True)
+    assigned_team_id: Mapped[str | None] = mapped_column(ForeignKey("teams.id"), index=True)
+    priority: Mapped[str] = mapped_column(String(20), default="normal", index=True)
+    unread_count: Mapped[int] = mapped_column(Integer, default=0)
+    last_message_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), index=True)
     automation_paused: Mapped[bool] = mapped_column(Boolean, default=False)
+    closed_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())
     updated_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now(), onupdate=func.now())
 
@@ -124,7 +134,8 @@ class Channel(Base):
     name: Mapped[str] = mapped_column(String(160))
     active: Mapped[bool] = mapped_column(Boolean, default=True)
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())
-    __table_args__ = (UniqueConstraint("company_id", "kind", "name"),)
+    updated_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now(), onupdate=func.now())
+    __table_args__ = (UniqueConstraint("company_id", "kind", "name"), CheckConstraint("kind IN ('web','telegram')", name="channel_kind"))
 
 class ChannelBot(Base):
     __tablename__ = "channel_bots"
@@ -132,22 +143,47 @@ class ChannelBot(Base):
     company_id: Mapped[str] = mapped_column(ForeignKey("companies.id"), index=True)
     channel_id: Mapped[str] = mapped_column(ForeignKey("channels.id"), index=True)
     name: Mapped[str] = mapped_column(String(160))
+    public_id: Mapped[str] = mapped_column(String(36), unique=True, default=uid, index=True)
+    username: Mapped[str | None] = mapped_column(String(64))
+    telegram_bot_id: Mapped[str | None] = mapped_column(String(32), index=True)
     active: Mapped[bool] = mapped_column(Boolean, default=False)
     token_ciphertext: Mapped[str | None] = mapped_column(Text)
+    token_fingerprint: Mapped[str | None] = mapped_column(String(16))
+    webhook_secret_ciphertext: Mapped[str | None] = mapped_column(Text)
     webhook_secret_hash: Mapped[str | None] = mapped_column(String(64))
+    mode: Mapped[str] = mapped_column(String(16), default="disabled")
+    status: Mapped[str] = mapped_column(String(16), default="draft", index=True)
+    polling_offset: Mapped[int] = mapped_column(Integer, default=0)
+    last_validated_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
+    last_poll_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
+    last_error: Mapped[str | None] = mapped_column(Text)
+    created_by: Mapped[str | None] = mapped_column(ForeignKey("users.id"))
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())
+    updated_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now(), onupdate=func.now())
+    __table_args__ = (
+        UniqueConstraint("company_id", "name"),
+        CheckConstraint("mode IN ('webhook','polling','disabled')", name="telegram_bot_mode"),
+        CheckConstraint("status IN ('draft','validating','active','inactive','error')", name="telegram_bot_status"),
+    )
 
 class ExternalIdentity(Base):
     __tablename__ = "external_identities"
     id: Mapped[str] = mapped_column(String(36), primary_key=True, default=uid)
     company_id: Mapped[str] = mapped_column(ForeignKey("companies.id"), index=True)
     channel_id: Mapped[str] = mapped_column(ForeignKey("channels.id"), index=True)
+    bot_id: Mapped[str | None] = mapped_column(ForeignKey("channel_bots.id"), index=True)
     external_id: Mapped[str] = mapped_column(String(160))
+    external_chat_id: Mapped[str | None] = mapped_column(String(160), index=True)
+    provider: Mapped[str] = mapped_column(String(32), default="telegram")
+    username: Mapped[str | None] = mapped_column(String(160))
     display_name: Mapped[str | None] = mapped_column(String(160))
+    phone: Mapped[str | None] = mapped_column(String(32))
     user_id: Mapped[str | None] = mapped_column(ForeignKey("users.id"), index=True)
     customer_id: Mapped[str | None] = mapped_column(ForeignKey("customers.id"), index=True)
+    metadata_json: Mapped[dict] = mapped_column("metadata", JSON, default=dict)
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())
-    __table_args__ = (UniqueConstraint("channel_id", "external_id"),)
+    updated_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now(), onupdate=func.now())
+    __table_args__ = (UniqueConstraint("channel_id", "bot_id", "external_id", "external_chat_id"),)
 
 class ConversationParticipant(Base):
     __tablename__ = "conversation_participants"
@@ -156,19 +192,31 @@ class ConversationParticipant(Base):
     user_id: Mapped[str | None] = mapped_column(ForeignKey("users.id"))
     role: Mapped[str] = mapped_column(String(32), default="customer")
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())
+    left_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
 
 class ConversationMessage(Base):
     __tablename__ = "conversation_messages"
     id: Mapped[str] = mapped_column(String(36), primary_key=True, default=uid)
     conversation_id: Mapped[str] = mapped_column(ForeignKey("conversations.id"), index=True)
+    company_id: Mapped[str | None] = mapped_column(ForeignKey("companies.id"), index=True)
+    channel_id: Mapped[str | None] = mapped_column(ForeignKey("channels.id"), index=True)
     direction: Mapped[str] = mapped_column(String(20))
     author_name: Mapped[str] = mapped_column(String(160))
     body: Mapped[str | None] = mapped_column(Text)
     message_type: Mapped[str] = mapped_column(String(20), default="text")
+    status: Mapped[str] = mapped_column(String(20), default="received", index=True)
     internal: Mapped[bool] = mapped_column(Boolean, default=False)
     external_message_id: Mapped[str | None] = mapped_column(String(160))
+    provider_update_id: Mapped[str | None] = mapped_column(String(160), index=True)
+    sender_user_id: Mapped[str | None] = mapped_column(ForeignKey("users.id"))
+    sender_external_identity_id: Mapped[str | None] = mapped_column(ForeignKey("external_identities.id"))
+    reply_to_message_id: Mapped[str | None] = mapped_column(ForeignKey("conversation_messages.id"))
+    normalized_text: Mapped[str | None] = mapped_column(Text)
     metadata_json: Mapped[dict] = mapped_column("metadata", JSON, default=dict)
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())
+    received_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
+    sent_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
+    failed_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
     __table_args__ = (UniqueConstraint("conversation_id", "external_message_id"),)
 
 class ExternalEvent(Base):
@@ -179,6 +227,10 @@ class ExternalEvent(Base):
     bot_id: Mapped[str | None] = mapped_column(ForeignKey("channel_bots.id"), index=True)
     external_event_id: Mapped[str] = mapped_column(String(160))
     idempotency_key: Mapped[str] = mapped_column(String(128), unique=True)
+    payload_hash: Mapped[str | None] = mapped_column(String(64), index=True)
+    status: Mapped[str] = mapped_column(String(20), default="received", index=True)
+    error: Mapped[str | None] = mapped_column(Text)
+    attempts: Mapped[int] = mapped_column(Integer, default=0)
     payload: Mapped[dict] = mapped_column(JSON, default=dict)
     received_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())
     processed_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
@@ -198,9 +250,34 @@ class OutboxEvent(Base):
     status: Mapped[str] = mapped_column(String(20), default="pending", index=True)
     attempts: Mapped[int] = mapped_column(Integer, default=0)
     available_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now(), index=True)
+    locked_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), index=True)
+    locked_by: Mapped[str | None] = mapped_column(String(100))
     last_error: Mapped[str | None] = mapped_column(Text)
     delivered_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
+    dead_lettered_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())
+
+class Attachment(Base):
+    __tablename__ = "attachments"
+    id: Mapped[str] = mapped_column(String(36), primary_key=True, default=uid)
+    company_id: Mapped[str] = mapped_column(ForeignKey("companies.id"), index=True)
+    message_id: Mapped[str] = mapped_column(ForeignKey("conversation_messages.id"), index=True)
+    conversation_id: Mapped[str] = mapped_column(ForeignKey("conversations.id"), index=True)
+    customer_id: Mapped[str | None] = mapped_column(ForeignKey("customers.id"), index=True)
+    equipment_id: Mapped[str | None] = mapped_column(ForeignKey("equipment.id"), index=True)
+    service_order_id: Mapped[str | None] = mapped_column(ForeignKey("service_orders.id"), index=True)
+    storage_provider: Mapped[str] = mapped_column(String(20), default="local")
+    storage_key: Mapped[str] = mapped_column(String(255), unique=True)
+    original_filename: Mapped[str | None] = mapped_column(String(255))
+    safe_filename: Mapped[str] = mapped_column(String(255))
+    declared_mime_type: Mapped[str | None] = mapped_column(String(160))
+    detected_mime_type: Mapped[str] = mapped_column(String(160))
+    size_bytes: Mapped[int] = mapped_column(Integer)
+    sha256: Mapped[str] = mapped_column(String(64), index=True)
+    telegram_file_id: Mapped[str | None] = mapped_column(String(255))
+    status: Mapped[str] = mapped_column(String(20), default="available", index=True)
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())
+    deleted_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
 
 class ServiceOrder(Base):
     __tablename__ = "service_orders"

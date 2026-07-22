@@ -33,7 +33,7 @@ class OmnichannelServiceTest(unittest.TestCase):
         duplicate, created_again = ingest_external_event(self.db, company_id=self.company_id, channel=self.channel, bot_id=None, external_event_id="update-10", idempotency_key="telegram:primary:update-10", external_sender_id="tg-77", sender_name="Ana", external_chat_id="chat-77", message_type="text", text="Preciso de ajuda")
         self.assertFalse(created_again)
         self.assertEqual(first.id, duplicate.id)
-        self.assertEqual(self.db.query(Conversation).count(), 1)
+        self.assertEqual(self.db.query(Conversation).filter_by(company_id=self.company_id).count(), 1)
 
     def test_outbox_is_idempotent(self):
         conversation = Conversation(company_id=self.company_id, channel="telegram", subject="chat-88")
@@ -44,7 +44,7 @@ class OmnichannelServiceTest(unittest.TestCase):
         self.assertFalse(created_again)
         self.assertEqual(message.id, same_message.id)
         self.assertEqual(event.id, same_event.id)
-        self.assertEqual(self.db.query(OutboxEvent).count(), 1)
+        self.assertEqual(self.db.query(OutboxEvent).filter_by(company_id=self.company_id).count(), 1)
 
     def test_outbox_retries_then_dead_letters(self):
         conversation = Conversation(company_id=self.company_id, channel="telegram", subject="chat-99")
