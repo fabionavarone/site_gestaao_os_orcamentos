@@ -27,7 +27,7 @@ Documento base:
 
 ## Estado atual
 
-- Fase atual: migracoes Alembic e importacao SQLite concluidas.
+- Fase atual: migracoes, importacao e escopos organizacionais concluídos.
 - Legado preservado: `app/server.py`, frontend estatico e SQLite continuam
   disponiveis somente como referencia/backup.
 - Nova aplicacao: `apps/api/`, com Compose em `docker-compose.yml`.

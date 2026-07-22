@@ -92,3 +92,11 @@ Proximo passo recomendado:
   ficam inativos ate uma redefinicao administrativa de senha.
 - Validados upgrade, downgrade, novo upgrade e importacao repetida com fixture
   contendo todos os relacionamentos legados.
+
+## 2026-07-22 - Organizacao e RBAC
+
+- Adicionados unidades, equipes e membros de equipe na revisao Alembic
+  `441a00f1e659`.
+- Criadas rotas protegidas para cadastro de papeis, unidades, equipes e
+  usuarios; permissoes e negacoes sao verificadas e auditadas no backend.
+- Validado ciclo completo de upgrade/downgrade/upgrade das duas revisoes.
