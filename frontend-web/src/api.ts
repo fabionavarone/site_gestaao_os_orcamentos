@@ -1,0 +1,5 @@
+export type User={id:string;name:string;email:string};
+let csrf=sessionStorage.getItem('csrf')||'';
+export function setCsrf(value:string){csrf=value;sessionStorage.setItem('csrf',value)}
+export async function api<T>(path:string,init:RequestInit={}):Promise<T>{const headers=new Headers(init.headers);if(init.body && !(init.body instanceof FormData))headers.set('Content-Type','application/json');if(init.method && !['GET','HEAD'].includes(init.method))headers.set('X-CSRF-Token',csrf);const response=await fetch(`/api/v1${path}`,{...init,headers,credentials:'include'});if(response.status===401){sessionStorage.removeItem('csrf');throw new Error('Sessão expirada')}if(!response.ok){const body=await response.json().catch(()=>({detail:'Falha inesperada'}));throw new Error(body.detail||'Falha inesperada')}return response.json()}
+export async function login(email:string,password:string){const result=await api<{user:User;csrf_token:string}>('/auth/login',{method:'POST',body:JSON.stringify({email,password})});setCsrf(result.csrf_token);return result.user}
