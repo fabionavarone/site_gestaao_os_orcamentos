@@ -46,11 +46,14 @@ Implementado neste corte:
 - Compose com migração, PostgreSQL, Redis, API, workers, frontend e Nginx.
 - workflow persistente e versionado, publicação imutável, editor React,
   instâncias/histórico e migração das OS existentes;
+- CRM tenant-scoped com clientes PF/PJ, normalização, duplicidade auditável,
+  contatos, endereços e interface de clientes;
 
 Ativação externa depende apenas de token autorizado e domínio/TLS. Consulte
 `docs/operations/TELEGRAM_AND_INBOX.md`.
 
 Operação do motor de fluxo: `docs/operations/WORKFLOW.md`.
+Operação do CRM: APIs em `/api/v1/crm` e tela Clientes no painel Web.
 
 ## Regras
 

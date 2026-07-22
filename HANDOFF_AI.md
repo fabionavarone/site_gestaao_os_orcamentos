@@ -173,3 +173,14 @@ Continue exatamente do ponto documentado.
 Trabalhe por fases.
 Teste antes de declarar qualquer fase concluida.
 Atualize README.md, DEVELOPMENT_LOG.md, HANDOFF_AI.md e PROJECT_CONTEXT.md ao final.
+
+## Atualização CRM - 2026-07-22
+
+O incremento `3d06aad` entregou CRM tenant-scoped: clientes PF/PJ, campos
+normalizados, conflito de duplicidade, contatos, endereços, solicitações de
+merge, API `/api/v1/crm` e tela React Clientes. A migração `d7a8e2c4b901` passou
+upgrade/downgrade/upgrade em SQLite temporário. A suíte modular passou 19 testes,
+a legada 3 e a frontend 5. O commit está publicado em `origin/main`.
+
+Próximo comando: implementar catálogos e equipamentos completos, preservando o
+workflow `c4f23b1a9d02` e o CRM `d7a8e2c4b901`.

@@ -177,6 +177,21 @@ alteração local foi perdida.
   repetição final foi impedida exclusivamente pelo DNS do registry.
 - Commit funcional: `8be9f5d feat: complete inbox operational controls`.
 
+## 2026-07-22 - CRM de clientes, contatos e endereços
+
+- Criada a revisão Alembic `d7a8e2c4b901`, reversível, com expansão de clientes
+  PF/PJ, normalização de documentos/contatos, contatos, endereços e solicitações
+  de merge.
+- Implementadas rotas tenant-scoped para consulta, criação, atualização,
+  detalhe, contatos, endereços e solicitação de merge; duplicidades não são
+  mescladas automaticamente e retornam conflito auditável.
+- Adicionada tela React Clientes com busca, cadastro e detalhe de contatos e
+  endereços, conectada ao backend real.
+- Testes finais do incremento: 19/19 backend modular, 3/3 legados, 5/5
+  frontend, compileall, build Vite e ciclo Alembic upgrade/downgrade/upgrade.
+- Commit: `3d06aad feat: deliver tenant scoped CRM operations`; push para
+  `origin/main` concluído.
+
 ## 2026-07-22 - Workflow persistente da Entrega Vertical 2
 
 - Criada revisão `c4f23b1a9d02` com definições, versões, estados, transições,

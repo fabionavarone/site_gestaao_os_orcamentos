@@ -52,11 +52,15 @@ Documento base:
 - A revisão `c4f23b1a9d02` introduz workflow persistente/versionado, publicação
   imutável, instâncias e histórico. O workflow padrão preserva os estados
   existentes e novas OS usam numeração transacional por empresa.
+- A revisão `d7a8e2c4b901` amplia o CRM com pessoa física/jurídica, campos
+  normalizados, contatos, endereços e solicitações de merge. As rotas
+  `/api/v1/crm` e a tela Clientes são tenant-scoped e auditadas.
 
 ## Proximo passo recomendado
 
-Próximo incremento da Entrega Vertical 2: CRM completo, contatos, endereços e
-detecção auditável de duplicidades. A Entrega Vertical 1 permanece validada.
+Próximo incremento da Entrega Vertical 2: catálogos e equipamentos completos,
+incluindo acessórios e histórico. CRM e workflow persistente permanecem
+validados.
 Em paralelo, validar pendencias de negocio:
 
 - categorias de equipamento do MVP;
