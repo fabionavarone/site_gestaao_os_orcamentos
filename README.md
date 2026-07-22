@@ -69,6 +69,7 @@ conclusão técnica, entrega e garantia permanecem como próxima unidade.
 Também está implementada localmente a API de sessões de bancada/remoto/campo,
 visitas, entrega/retirada, garantia e retorno, na migração candidata
 `h4e5f6a7b803`; o frontend específico dessas ações ainda deve ser ampliado.
+Eventos públicos dessas operações reutilizam o outbox Telegram existente.
 
 Para encerrar esta seção e retomá-la em outra sessão, leia primeiro
 `README.md`, `PROJECT_CONTEXT.md`, `DEVELOPMENT_LOG.md` e `HANDOFF_AI.md`.

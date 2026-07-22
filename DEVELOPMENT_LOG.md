@@ -285,3 +285,9 @@ alteração local foi perdida.
   compileall e Alembic upgrade/downgrade/upgrade aprovados.
 - Próximo passo: tela React para essas operações, transições finais do workflow,
   notificações públicas Telegram e E2E completo.
+
+## 2026-07-22 - Notificações públicas de assistência
+
+- Entrega, garantia e retorno agora reutilizam o serviço canônico de outbox
+  Telegram quando a OS possui conversa Telegram; notas e eventos internos não
+  são enviados.

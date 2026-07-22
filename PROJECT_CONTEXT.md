@@ -99,6 +99,10 @@ O backend local já recebeu `completion_api.py` e a revisão candidata
 retorno. A API e os testes passam; a interface React correspondente e a
 integração com transições/notificações ainda são o próximo incremento.
 
+Eventos públicos de entrega, garantia e retorno passaram a enfileirar mensagens
+via o outbox Telegram existente quando aplicável; conteúdo interno permanece
+fora do canal externo.
+
 ## Estado para retomada em nova seção - 2026-07-22
 
 O último commit publicado é `202095f`. A próxima unidade começou localmente

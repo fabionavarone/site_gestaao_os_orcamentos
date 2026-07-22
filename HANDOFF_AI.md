@@ -321,6 +321,11 @@ medição/teste e aplicar checklist publicado. Ainda faltam conclusão técnica,
 bancada/remoto/campo, agenda, entrega, garantia, retorno, notificações públicas
 e E2E completo. Faça o commit assim que `.git/index` estiver gravável.
 
+Eventos públicos de entrega, garantia e retorno já reutilizam o outbox Telegram
+canônico quando há conversa Telegram vinculada; eventos internos não geram
+mensagem externa. A próxima unidade é a interface React dessas operações e o
+teste E2E completo com fake Telegram.
+
 ## Atualização de atendimento e garantia - 2026-07-22
 
 Foi iniciado o incremento seguinte com `completion_api.py` e a migração
