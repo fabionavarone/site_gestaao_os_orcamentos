@@ -80,3 +80,15 @@ Proximo passo recomendado:
 - A validacao de importacao/compilacao da API passou. Requests HTTP em memoria
   travaram no sandbox, portanto ainda nao ha declaracao de integracao HTTP
   aprovada; o bloqueio foi registrado em `docs/operations/EXTERNAL_BLOCKERS.md`.
+
+## 2026-07-22 - Migracoes Alembic e importacao SQLite
+
+- Criada a revisao Alembic `3e0c5f1889f9`, reversivel, para empresas, RBAC,
+  CRM, equipamentos, OS, conversas e auditoria.
+- O runtime nao cria mais tabelas; o schema e aplicado por Alembic.
+- Implementado `scripts/import_sqlite.py`, transacional, idempotente e com
+  preservacao de IDs e relacionamentos do banco legado.
+- Hashes legados nao foram reutilizados como credenciais: usuarios importados
+  ficam inativos ate uma redefinicao administrativa de senha.
+- Validados upgrade, downgrade, novo upgrade e importacao repetida com fixture
+  contendo todos os relacionamentos legados.

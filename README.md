@@ -16,13 +16,13 @@ O blueprint mestre esta em:
 
 - `docs/product/MASTER_BLUEPRINT.md`
 
-Estado atual: refatoracao segura em andamento. O MVP legado foi preservado e a
+Estado atual: migracoes e importacao legada concluidas. O MVP legado foi preservado e a
 nova fundacao modular FastAPI/PostgreSQL/Redis/Compose esta em `apps/api/` e
 `infra/`; ela ainda nao substituiu o runtime legado.
 
 ## Fase atual
 
-Fundacao da migracao para Fase A/B.
+Dominio, organizacao e canais sobre a base migrada.
 
 Consulte `docs/operations/LOCAL_RUNBOOK.md` para iniciar e testar o sistema.
 
@@ -35,7 +35,7 @@ Implementado neste corte:
 - fronteira canonica e idempotente para updates Telegram;
 - testes automatizados sem dependencias externas.
 
-Ainda requer evolucao antes de producao: PostgreSQL/Redis, upload e arquivos,
+Ainda requer evolucao antes de producao: upload e arquivos,
 Telegram real com segredos, IA local, documentos, estoque, financeiro, portais,
 backup, observabilidade e politicas de negocio aprovadas.
 

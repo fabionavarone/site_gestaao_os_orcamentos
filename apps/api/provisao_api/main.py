@@ -38,7 +38,6 @@ class EquipmentIn(BaseModel): customer_id: str; category: str = Field(min_length
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
-    Base.metadata.create_all(engine)
     yield
 app = FastAPI(title="Provisao Manager API", version="0.1.0", lifespan=lifespan)
 app.add_middleware(CORSMiddleware, allow_origins=settings().origins, allow_credentials=True, allow_methods=["GET","POST","PATCH","DELETE"], allow_headers=["Content-Type","X-CSRF-Token","X-Request-ID"])

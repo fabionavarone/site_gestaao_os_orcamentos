@@ -53,7 +53,8 @@ Prioridade para a proxima IA:
    ou codigo.
 2. Ler `docs/adr/001-stdlib-mvp.md` e `docs/operations/LOCAL_RUNBOOK.md` antes
    de substituir o corte local por infraestrutura de producao.
-3. Concluir Alembic e migracao SQLite para PostgreSQL antes de uso multiusuario real.
+3. Aplicar `alembic upgrade head` e homologar o importador SQLite antes de uso
+   multiusuario real.
 4. Manter Telegram como gateway sem acesso direto ao banco.
 5. Manter IA local desacoplada das transacoes e com saidas validadas por schema.
 6. Nunca tratar o endpoint demonstrativo Telegram como webhook de producao sem

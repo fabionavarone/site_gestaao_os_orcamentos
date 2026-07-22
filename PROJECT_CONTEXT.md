@@ -27,19 +27,20 @@ Documento base:
 
 ## Estado atual
 
-- Fase atual: Fundacao da refatoracao para Fase A/B.
+- Fase atual: migracoes Alembic e importacao SQLite concluidas.
 - Legado preservado: `app/server.py`, frontend estatico e SQLite continuam
   disponiveis somente como referencia/backup.
 - Nova aplicacao: `apps/api/`, com Compose em `docker-compose.yml`.
-- Persistencia alvo: PostgreSQL; SQLite ainda nao foi migrado.
+- Persistencia alvo: PostgreSQL, com revisao Alembic e importador SQLite
+  idempotente em `scripts/import_sqlite.py`.
 - Documentacao de produto: `docs/product/MASTER_BLUEPRINT.md`.
 - Execucao e limites: `docs/operations/LOCAL_RUNBOOK.md`.
 - Decisao de arquitetura do corte: `docs/adr/001-stdlib-mvp.md`.
 
 ## Proximo passo recomendado
 
-Proximo incremento recomendado: concluir migracoes Alembic e importador
-SQLite, depois implementar os modulos de identidade/organizacao e conversas.
+Proximo incremento recomendado: implementar os modulos de identidade,
+organizacao e conversas sobre o schema migrado.
 Em paralelo, validar pendencias de negocio:
 
 - categorias de equipamento do MVP;
